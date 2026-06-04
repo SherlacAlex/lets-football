@@ -10,11 +10,14 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   modules: ["@nuxtjs/supabase", '@nuxt/ui', "@nuxt/icon"],
   css: ['~/assets/css/main.css'],
+  routeRules: {
+    '/': { redirect: '/welcome' },
+  },
   supabase: {
     redirectOptions: {
       login: '/login',
       callback: '/confirm',
-      exclude: ['/welcome', '/register']
+      exclude: ['/', '/welcome', '/register']
     }
   }
 });
