@@ -11,17 +11,14 @@
           </p>
         </div>
         <div
-          class="flex items-center space-x-2 bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-400"
-        >
+          class="flex items-center space-x-2 bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-400">
           <UIcon name="i-heroicons-clock" class="w-4 h-4 text-emerald-400" />
           <span>Predictions lock at kick-off (IST)</span>
         </div>
       </div>
 
-      <div
-        v-if="dashboardError"
-        class="p-4 mb-6 rounded-2xl border border-rose-500/20 bg-rose-500/10 text-rose-400 text-sm flex items-start gap-2"
-      >
+      <div v-if="dashboardError"
+        class="p-4 mb-6 rounded-2xl border border-rose-500/20 bg-rose-500/10 text-rose-400 text-sm flex items-start gap-2">
         <UIcon name="i-heroicons-exclamation-triangle" class="w-5 h-5 shrink-0 mt-0.5" />
         <span>Could not load dashboard. {{ dashboardError.message }}</span>
       </div>
@@ -33,30 +30,23 @@
         </AppCard>
       </div>
 
-      <div
-        v-else-if="!dashboardItems.length"
-        class="text-center py-16 bg-slate-900/40 border border-slate-800/80 rounded-3xl"
-      >
+      <div v-else-if="!dashboardItems.length"
+        class="text-center py-16 bg-slate-900/40 border border-slate-800/80 rounded-3xl">
         <UIcon name="i-heroicons-calendar-days" class="w-12 h-12 text-slate-600 mx-auto mb-4" />
         <p class="text-slate-400 text-sm">No fixtures scheduled yet. Check back soon.</p>
       </div>
 
       <div v-if="!dashboardPending && dashboardItems.length" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <FixturePredictionCard
-          v-for="item in dashboardItems"
-          :key="item.fixture.id"
-          :fixture="item.fixture"
-          :prediction="item.prediction"
-          @open-predictions="openPredictions(item)"
-        />
+        <div v-for="item in dashboardItems" :id="fixtureCardElementId(item.fixture.id)" :key="item.fixture.id"
+          class="scroll-mt-24">
+          <FixturePredictionCard :fixture="item.fixture" :prediction="item.prediction"
+            @open-predictions="openPredictions(item)" />
+        </div>
       </div>
     </div>
 
-    <FixturePredictionsDialog
-      v-model:open="isPredictionsOpen"
-      :fixture="selectedFixture"
-      :existing-prediction="selectedPrediction"
-    />
+    <FixturePredictionsDialog v-model:open="isPredictionsOpen" :fixture="selectedFixture"
+      :existing-prediction="selectedPrediction" />
   </div>
 </template>
 
@@ -65,7 +55,12 @@ import type { DashboardFixture } from '~/types/DashboardFixture'
 import type { Fixture } from '~/types/fixtures'
 import type { Prediction } from '~/types/predictions'
 import { apiRoutes } from '~/utils/api'
-import { normalizeDashboard } from '~/utils/dashboard'
+import {
+  findFirstScheduledFixture,
+  fixtureCardElementId,
+  normalizeDashboard,
+  scrollToFixtureCard,
+} from '~/utils/dashboard'
 
 definePageMeta({
   layout: 'auth',
@@ -110,9 +105,38 @@ function openPredictions(item: DashboardFixture) {
   isPredictionsOpen.value = true
 }
 
+function scrollToFirstScheduledMatch(smooth = false) {
+  const first = findFirstScheduledFixture(dashboardItems.value)
+  if (!first) {
+    return
+  }
+  nextTick(() => {
+    scrollToFixtureCard(first.fixture.id, smooth)
+  })
+}
+
+watch(
+  () => dashboardPending.value,
+  (pending, wasPending) => {
+    if (wasPending && !pending && dashboardItems.value.length) {
+      scrollToFirstScheduledMatch()
+    }
+  },
+)
+
+watch(isPredictionsOpen, (open, wasOpen) => {
+  if (wasOpen && !open) {
+    scrollToFirstScheduledMatch(true)
+  }
+})
+
 onMounted(() => {
   if (!user.value) {
     navigateTo('/login')
+    return
+  }
+  if (!dashboardPending.value && dashboardItems.value.length) {
+    scrollToFirstScheduledMatch()
   }
 })
 </script>

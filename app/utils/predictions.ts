@@ -8,13 +8,46 @@ export function stringifyAnswer(value: AnswerValue): string {
   return String(value).trim()
 }
 
+export function isQuestionUnanswered(
+  question: FixtureQuestion,
+  value: AnswerValue,
+): boolean {
+  const type = question.question_template.answer_type
+
+  if (type === 'TEAM') {
+    return value == null
+  }
+
+  if (type === 'BOOLEAN') {
+    return typeof value !== 'boolean'
+  }
+
+  if (type === 'NUMBER') {
+    if (value == null || value === '') return true
+    return String(value).trim() === ''
+  }
+
+  if (value == null) return true
+  if (typeof value === 'boolean') return false
+  if (value === '') return true
+  return String(value).trim() === ''
+}
+
+export function isScoreMissing(
+  predictedHomeScore: number | null,
+  predictedAwayScore: number | null,
+): boolean {
+  if (predictedHomeScore == null || predictedAwayScore == null) return true
+  return Number.isNaN(predictedHomeScore) || Number.isNaN(predictedAwayScore)
+}
+
 export function validatePredictionForm(
   predictedHomeScore: number | null,
   predictedAwayScore: number | null,
   questions: FixtureQuestion[],
   answers: Record<string, AnswerValue>,
 ): string | null {
-  if (predictedHomeScore == null || predictedAwayScore == null) {
+  if (isScoreMissing(predictedHomeScore, predictedAwayScore)) {
     return 'Please enter your predicted score for both teams.'
   }
 
@@ -22,13 +55,9 @@ export function validatePredictionForm(
     return null
   }
 
-  const unansweredCount = questions.filter((q) => {
-    const value = answers[q.id]
-    if (value == null) return true
-    if (typeof value === 'boolean') return false
-    if (value === '') return true
-    return String(value).trim() === ''
-  }).length
+  const unansweredCount = questions.filter((q) =>
+    isQuestionUnanswered(q, answers[q.id]),
+  ).length
 
   if (unansweredCount > 0) {
     return `Please answer all ${questions.length} questions before saving.`

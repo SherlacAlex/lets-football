@@ -2,8 +2,7 @@
   <input v-if="answerType === 'NUMBER'" v-model="answer" type="number" min="0" inputmode="numeric"
     placeholder="Enter a number"
     class="mt-3 w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-xl px-3 py-2.5 text-sm text-slate-200 focus:outline-none transition-all duration-200" />
-  <select v-else v-model="answer"
-    class="mt-3 w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-xl px-3 py-2.5 text-sm text-slate-200 focus:outline-none transition-all duration-200">
+  <select v-else v-model="answer" :class="selectClass">
     <option v-for="option in options" :key="option.label" :value="option.value">
       {{ option.label }}
     </option>
@@ -17,7 +16,15 @@ import type { FixtureQuestion } from '~/types/questions'
 const props = defineProps<{
   question: FixtureQuestion
   fixture: Fixture
+  hasError?: boolean
 }>()
+
+const selectClass = computed(() => [
+  'mt-3 w-full bg-slate-950 border rounded-xl px-3 py-2.5 text-sm text-slate-200 focus:outline-none transition-all duration-200 focus:ring-1',
+  props.hasError
+    ? 'border-rose-500 focus:border-rose-500 focus:ring-rose-500'
+    : 'border-slate-800 focus:border-emerald-500 focus:ring-emerald-500',
+])
 
 const answer = defineModel<string | boolean>({ default: '' })
 

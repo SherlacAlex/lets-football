@@ -46,7 +46,7 @@
           </div>
 
           <template v-else>
-            <div class="bg-slate-950/50 border border-slate-800 rounded-2xl p-4 space-y-3">
+            <div :class="scorePredictionClass">
               <div class="flex items-center justify-between gap-2">
                 <p class="text-sm font-semibold text-slate-200">Your score prediction</p>
                 <span class="text-xs font-bold text-emerald-400">2 pts</span>
@@ -82,7 +82,12 @@
                     <p class="text-sm text-slate-200 leading-relaxed">
                       {{ question.question_template.question }}
                     </p>
-                    <FixtureQuestionAnswer v-model="answers[question.id]" :question="question" :fixture="fixture" />
+                    <FixtureQuestionAnswer
+                      v-model="answers[question.id]"
+                      :question="question"
+                      :fixture="fixture"
+                      :has-error="questionHasError(question.id)"
+                    />
                   </div>
                 </div>
               </li>
@@ -96,9 +101,11 @@
             :disabled="saving" @click="close">
             Cancel
           </button>
-          <button type="button"
+          <button
+            v-if="canEditPredictions"
+            type="button"
             class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 text-sm font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-            :disabled="saving || !!questionsError" @click="submit">
+            :disabled="isSubmitDisabled" @click="submit">
             {{ saving ? 'Saving…' : hasExistingPrediction ? 'Update' : 'Save' }}
           </button>
         </div>
@@ -120,7 +127,12 @@ import type {
 } from '~/types/predictions'
 import { apiRoutes } from '~/utils/api'
 import { formatMatchDate } from '~/utils/fixtures'
-import { stringifyAnswer, validatePredictionForm } from '~/utils/predictions'
+import {
+  isQuestionUnanswered,
+  isScoreMissing,
+  stringifyAnswer,
+  validatePredictionForm,
+} from '~/utils/predictions'
 
 const open = defineModel<boolean>('open', { required: true })
 
@@ -140,10 +152,37 @@ const predictedHomeScore = ref<number | null>(null)
 const predictedAwayScore = ref<number | null>(null)
 const hasExistingPrediction = ref(false)
 
+type FormSnapshot = {
+  predictedHomeScore: number | null
+  predictedAwayScore: number | null
+  answers: Record<string, string>
+}
+
+const savedFormSnapshot = ref<FormSnapshot | null>(null)
+
 const questionsError = ref<string | null>(null)
 const saving = ref(false)
 const formMessage = ref('')
 const formMessageType = ref<'success' | 'error'>('success')
+const showValidationErrors = ref(false)
+
+function questionHasError(questionId: string) {
+  if (!showValidationErrors.value) return false
+  const question = questions.value.find((q) => q.id === questionId)
+  if (!question) return false
+  return isQuestionUnanswered(question, answers.value[questionId])
+}
+
+const scoreHasError = computed(
+  () =>
+    showValidationErrors.value &&
+    isScoreMissing(predictedHomeScore.value, predictedAwayScore.value),
+)
+
+const scorePredictionClass = computed(() => [
+  'bg-slate-950/50 border rounded-2xl p-4 space-y-3',
+  scoreHasError.value ? 'border-rose-500' : 'border-slate-800',
+])
 
 function resetForm() {
   questions.value = []
@@ -151,9 +190,39 @@ function resetForm() {
   predictedHomeScore.value = null
   predictedAwayScore.value = null
   hasExistingPrediction.value = false
+  savedFormSnapshot.value = null
   questionsError.value = null
   formMessage.value = ''
+  showValidationErrors.value = false
 }
+
+function captureFormSnapshot() {
+  savedFormSnapshot.value = {
+    predictedHomeScore: predictedHomeScore.value,
+    predictedAwayScore: predictedAwayScore.value,
+    answers: Object.fromEntries(
+      questions.value.map((q) => [q.id, stringifyAnswer(answers.value[q.id])]),
+    ),
+  }
+}
+
+const hasFormChanges = computed(() => {
+  const snapshot = savedFormSnapshot.value
+  if (!snapshot) return true
+
+  if (predictedHomeScore.value !== snapshot.predictedHomeScore) return true
+  if (predictedAwayScore.value !== snapshot.predictedAwayScore) return true
+
+  return questions.value.some(
+    (q) => stringifyAnswer(answers.value[q.id]) !== snapshot.answers[q.id],
+  )
+})
+
+const isSubmitDisabled = computed(
+  () => saving.value || !!questionsError.value || (hasExistingPrediction.value && !hasFormChanges.value),
+)
+
+const canEditPredictions = computed(() => props.fixture?.status === 'scheduled')
 
 function applyExistingPrediction(prediction: Prediction | null) {
   if (!prediction) {
@@ -206,6 +275,12 @@ function loadDialogData() {
   questions.value = dashboardStore.getQuestionsForFixture(props.fixture.id)
   initEmptyAnswers()
   applyExistingPrediction(props.existingPrediction ?? null)
+
+  if (hasExistingPrediction.value) {
+    captureFormSnapshot()
+  } else {
+    savedFormSnapshot.value = null
+  }
 }
 
 function applyMutationToStore(response: PredictionMutationResponse) {
@@ -213,7 +288,7 @@ function applyMutationToStore(response: PredictionMutationResponse) {
 }
 
 async function submit() {
-  if (!props.fixture) return
+  if (!props.fixture || !canEditPredictions.value) return
 
   const validationError = validatePredictionForm(
     predictedHomeScore.value,
@@ -223,10 +298,13 @@ async function submit() {
   )
 
   if (validationError) {
+    showValidationErrors.value = true
     formMessage.value = validationError
     formMessageType.value = 'error'
     return
   }
+
+  showValidationErrors.value = false
 
   const answersPayload = questions.value.map((q) => ({
     fixtureQuestionId: q.id,
@@ -260,6 +338,7 @@ async function submit() {
       )
 
       applyMutationToStore(updateResult)
+      captureFormSnapshot()
       formMessage.value = 'Predictions updated successfully!'
     } else {
       const createPayload: SavePredictionRequest = {
