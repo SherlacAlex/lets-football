@@ -1,0 +1,29 @@
+{
+  "name": "lets-football",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "@nuxt/icon": "^2.2.3",
+    "@nuxt/ui": "^4.8.1",
+    "@nuxtjs/supabase": "^2.0.9",
+    "@nuxtjs/tailwindcss": "^6.14.0",
+    "nuxt": "^4.4.6",
+    "vue": "^3.5.34",
+    "vue-router": "^5.0.7"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.0",
+    "@types/node": "^25.9.1",
+    "tailwindcss": "^4.3.0",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.3"
+  }
+}
