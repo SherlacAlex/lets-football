@@ -96,3 +96,25 @@ export function getFixturePointsEarned(
   )
   return scorePoints + answerPoints
 }
+
+type AnswerTeam = { id: string; name: string }
+
+export function formatPredictionAnswerDisplay(
+  answerValue: string,
+  answerType: QuestionAnswerType,
+  homeTeam?: AnswerTeam | null,
+  awayTeam?: AnswerTeam | null,
+): string {
+  if (answerType === 'BOOLEAN') {
+    if (answerValue === 'true') return 'Yes'
+    if (answerValue === 'false') return 'No'
+    return answerValue
+  }
+
+  if (answerType === 'TEAM') {
+    const team = [homeTeam, awayTeam].find((t) => t?.id === answerValue)
+    return team?.name ?? answerValue
+  }
+
+  return answerValue
+}

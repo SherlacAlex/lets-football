@@ -11,7 +11,11 @@ export default defineEventHandler(async (event) => {
     // Verify fixture is completed
     const { data: fixture, error: fixtureError } = await supabase
         .from('fixtures')
-        .select('status')
+        .select(`
+      status,
+      home_team:teams!fixtures_home_team_id_fkey (id, name),
+      away_team:teams!fixtures_away_team_id_fkey (id, name)
+    `)
         .eq('id', fixtureId)
         .single()
     if (fixtureError || fixture.status !== 'completed') {
@@ -32,7 +36,7 @@ export default defineEventHandler(async (event) => {
         .select(`
       answer_value,
       points_earned,
-      question_template:question_template_id (code, question)
+      question_template:question_template_id (code, question, answer_type)
     `)
         .eq('user_id', targetUserId)
         .eq('fixture_id', fixtureId)
@@ -47,6 +51,8 @@ export default defineEventHandler(async (event) => {
     return {
         score_prediction: scorePred || null,
         answers: answers || [],
-        actual_result: actualResult || null
+        actual_result: actualResult || null,
+        home_team: fixture.home_team,
+        away_team: fixture.away_team,
     }
 })

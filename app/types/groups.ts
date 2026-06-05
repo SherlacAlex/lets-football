@@ -54,10 +54,16 @@ export type MemberFixturePredictionDetail = {
   answers: Array<{
     answer_value: string
     points_earned: number
-    question_template: { code: string; question: string }
+    question_template: {
+      code: string
+      question: string
+      answer_type: string
+    }
   }>
   actual_result: {
     home_score: number
     away_score: number
   } | null
+  home_team: { id: string; name: string }
+  away_team: { id: string; name: string }
 }
