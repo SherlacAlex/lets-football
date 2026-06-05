@@ -1,4 +1,11 @@
 export const apiRoutes = {
+    profileAdmin: "/api/profile/admin",
+    adminFixtures: "/api/admin/fixtures",
+    adminFixture: (fixtureId: string) => `/api/admin/fixtures/${fixtureId}`,
+    adminFixtureResult: (fixtureId: string) =>
+        `/api/admin/fixtures/${fixtureId}/result`,
+    adminFixtureAnswers: (fixtureId: string) =>
+        `/api/admin/fixtures/${fixtureId}/answers`,
     fixtures: "/api/fixtures",
     predictFixture: (fixtureId: string) => `/api/fixtures/${fixtureId}/predict`,
     groups: "/api/groups",

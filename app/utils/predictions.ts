@@ -1,5 +1,6 @@
 import type { FixtureQuestion } from '~/types/questions'
 import type { QuestionAnswerType } from '~/types/questions'
+import type { Prediction, PredictionAnswer } from '~/types/predictions'
 
 export type AnswerValue = string | boolean | null | undefined
 
@@ -82,4 +83,16 @@ export function validatePredictionForm(
   }
 
   return null
+}
+
+export function getFixturePointsEarned(
+  prediction: Prediction | null,
+  answers: PredictionAnswer[] = [],
+): number {
+  const scorePoints = prediction?.points_earned ?? 0
+  const answerPoints = answers.reduce(
+    (sum, answer) => sum + (answer.points_earned ?? 0),
+    0,
+  )
+  return scorePoints + answerPoints
 }

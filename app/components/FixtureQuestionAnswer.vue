@@ -1,8 +1,15 @@
 <template>
-  <input v-if="answerType === 'NUMBER'" v-model="answer" type="number" min="0" inputmode="numeric"
+  <input
+    v-if="answerType === 'NUMBER'"
+    v-model="answer"
+    type="number"
+    min="0"
+    inputmode="numeric"
     placeholder="Enter a number"
-    class="mt-3 w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-xl px-3 py-2.5 text-sm text-slate-200 focus:outline-none transition-all duration-200" />
-  <select v-else v-model="answer" :class="selectClass">
+    :disabled="disabled"
+    :class="inputClass"
+  />
+  <select v-else v-model="answer" :disabled="disabled" :class="selectClass">
     <option v-for="option in options" :key="option.label" :value="option.value">
       {{ option.label }}
     </option>
@@ -13,17 +20,38 @@
 import type { Fixture } from '~/types/fixtures'
 import type { FixtureQuestion } from '~/types/questions'
 
-const props = defineProps<{
-  question: FixtureQuestion
-  fixture: Fixture
-  hasError?: boolean
-}>()
+const props = withDefaults(
+  defineProps<{
+    question: FixtureQuestion
+    fixture: Fixture
+    hasError?: boolean
+    disabled?: boolean
+    isCorrect?: boolean
+  }>(),
+  {
+    disabled: false,
+    isCorrect: false,
+  },
+)
+
+const fieldStateClass = computed(() => {
+  if (props.hasError) {
+    return 'border-rose-500 focus:border-rose-500 focus:ring-rose-500'
+  }
+  if (props.isCorrect) {
+    return 'border-emerald-500 focus:border-emerald-500 focus:ring-emerald-500'
+  }
+  return 'border-slate-800 focus:border-emerald-500 focus:ring-emerald-500'
+})
+
+const inputClass = computed(() => [
+  'mt-3 w-full bg-slate-950 border rounded-xl px-3 py-2.5 text-sm text-slate-200 focus:outline-none transition-all duration-200 focus:ring-1 disabled:opacity-60 disabled:cursor-not-allowed',
+  fieldStateClass.value,
+])
 
 const selectClass = computed(() => [
-  'mt-3 w-full bg-slate-950 border rounded-xl px-3 py-2.5 text-sm text-slate-200 focus:outline-none transition-all duration-200 focus:ring-1',
-  props.hasError
-    ? 'border-rose-500 focus:border-rose-500 focus:ring-rose-500'
-    : 'border-slate-800 focus:border-emerald-500 focus:ring-emerald-500',
+  'mt-3 w-full bg-slate-950 border rounded-xl px-3 py-2.5 text-sm text-slate-200 focus:outline-none transition-all duration-200 focus:ring-1 disabled:opacity-60 disabled:cursor-not-allowed',
+  fieldStateClass.value,
 ])
 
 const answer = defineModel<string | boolean>({ default: '' })

@@ -7,10 +7,10 @@
       </span>
       <div class="flex items-center gap-2">
         <span
-          v-if="prediction"
+          v-if="actualResult"
           class="px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-500/10 text-indigo-400 border border-indigo-500/30"
         >
-          Predicted
+          Result entered
         </span>
         <span
           class="px-2 py-0.5 rounded-full border text-xs font-medium capitalize"
@@ -39,57 +39,37 @@
     </div>
 
     <div
-      v-if="prediction"
+      v-if="actualResult"
       class="mt-4 text-center text-xs text-slate-500"
     >
-      Your pick:
+      Final score:
       <span class="text-slate-300 font-semibold tabular-nums">
-        {{ prediction.home_score }} – {{ prediction.away_score }}
+        {{ actualResult.home_score }} – {{ actualResult.away_score }}
       </span>
     </div>
 
-    <div class="mt-6 flex items-end justify-between gap-3">
-      <div v-if="showPointsEarned" class="text-left min-w-0">
-        <p class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">
-          Points earned
-        </p>
-        <p class="text-lg font-bold text-emerald-400 tabular-nums leading-tight">
-          {{ totalPointsEarned }}
-          <span class="text-xs font-semibold">{{ totalPointsEarned === 1 ? 'pt' : 'pts' }}</span>
-        </p>
-      </div>
-
+    <div class="mt-6 flex justify-end">
       <button
         type="button"
-        class="relative shrink-0 overflow-hidden px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 text-xs font-bold rounded-xl active:scale-95 transition-all duration-200"
-        :class="{ 'ml-auto': !showPointsEarned }"
-        @click="emit('open-predictions')"
+        class="relative overflow-hidden px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 text-xs font-bold rounded-xl active:scale-95 transition-all duration-200"
+        @click="emit('open-results')"
       >
-        {{ prediction ? 'View predictions' : 'Predictions' }}
+        {{ actualResult ? 'Update results' : 'Enter results' }}
       </button>
     </div>
   </AppCard>
 </template>
 
 <script setup lang="ts">
-import type { FixtureListItem } from '~/types/fixtures'
-import type { Prediction, PredictionAnswer } from '~/types/predictions'
+import type { AdminFixtureListItem } from '~/types/AdminDashboardFixture'
 import { formatMatchDate, statusBadgeClass, statusLabel } from '~/utils/fixtures'
-import { getFixturePointsEarned } from '~/utils/predictions'
 
-const props = defineProps<{
-  fixture: FixtureListItem
-  prediction: Prediction | null
-  answers?: PredictionAnswer[]
+defineProps<{
+  fixture: AdminFixtureListItem
+  actualResult: { home_score: number; away_score: number } | null
 }>()
 
 const emit = defineEmits<{
-  'open-predictions': []
+  'open-results': []
 }>()
-
-const showPointsEarned = computed(() => props.fixture.status === 'completed')
-
-const totalPointsEarned = computed(() =>
-  getFixturePointsEarned(props.prediction, props.answers ?? []),
-)
 </script>

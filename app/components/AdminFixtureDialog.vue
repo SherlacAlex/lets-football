@@ -14,7 +14,7 @@
       >
         <div class="flex items-center justify-between px-6 py-4 border-b border-slate-800 shrink-0">
           <h2 :id="titleId" class="text-lg font-extrabold text-white">
-            Predictions
+            Manage Results
           </h2>
           <button
             type="button"
@@ -52,53 +52,29 @@
               />
               <FixtureTeamDisplay :team="fixture.away_team" align="away" />
             </div>
-            <p class="text-xs text-slate-500 mt-3 text-center">Actual match score</p>
           </div>
 
-          <template v-if="canEditPredictions">
-            <div :class="scorePredictionClass">
-              <div class="flex items-center justify-between gap-2">
-                <p class="text-sm font-semibold text-slate-200">Your score prediction</p>
-                <span class="text-xs font-bold text-emerald-400">2 pts</span>
-              </div>
-              <div class="flex items-center justify-center gap-3">
-                <input
-                  v-model.number="predictedHomeScore"
-                  type="number"
-                  min="0"
-                  placeholder="0"
-                  class="w-14 h-14 bg-slate-950 border border-slate-800 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-xl text-center font-bold text-lg text-white focus:outline-none"
-                />
-                <span class="text-slate-600 font-bold">-</span>
-                <input
-                  v-model.number="predictedAwayScore"
-                  type="number"
-                  min="0"
-                  placeholder="0"
-                  class="w-14 h-14 bg-slate-950 border border-slate-800 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-xl text-center font-bold text-lg text-white focus:outline-none"
-                />
-              </div>
+          <div :class="scoreResultClass">
+            <div class="flex items-center justify-between gap-2">
+              <p class="text-sm font-semibold text-slate-200">Match result</p>
             </div>
-          </template>
-
-          <div
-            v-else-if="existingPrediction"
-            :class="viewScoreClass"
-          >
-            <div class="flex items-center justify-between gap-2 mb-2">
-              <p class="text-xs text-slate-500">Your prediction</p>
-              <span
-                v-if="scorePointsEarned != null"
-                class="text-xs font-bold"
-                :class="isScoreCorrect ? 'text-emerald-400' : 'text-slate-500'"
-              >
-                {{ scorePointsEarned }} {{ scorePointsEarned === 1 ? 'pt' : 'pts' }}
-              </span>
+            <div class="flex items-center justify-center gap-3">
+              <input
+                v-model.number="actualHomeScore"
+                type="number"
+                min="0"
+                placeholder="0"
+                class="w-14 h-14 bg-slate-950 border border-slate-800 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-xl text-center font-bold text-lg text-white focus:outline-none"
+              />
+              <span class="text-slate-600 font-bold">-</span>
+              <input
+                v-model.number="actualAwayScore"
+                type="number"
+                min="0"
+                placeholder="0"
+                class="w-14 h-14 bg-slate-950 border border-slate-800 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-xl text-center font-bold text-lg text-white focus:outline-none"
+              />
             </div>
-            <p class="text-2xl font-bold text-white tabular-nums text-center">
-              {{ existingPrediction.home_score }} – {{ existingPrediction.away_score }}
-            </p>
-            <p class="text-xs text-slate-500 mt-2 text-center">Predictions are locked for this match.</p>
           </div>
 
           <div v-if="!questions.length" class="text-center py-6 text-slate-400 text-sm">
@@ -109,7 +85,7 @@
             <li
               v-for="(question, index) in questions"
               :key="question.id"
-              :class="questionCardClass(question)"
+              class="bg-slate-950/50 border border-slate-800 rounded-2xl p-4"
             >
               <div class="flex items-start gap-3">
                 <span
@@ -124,12 +100,6 @@
                     >
                       {{ question.points }} {{ question.points === 1 ? 'pt' : 'pts' }}
                     </span>
-                    <span
-                      v-if="!canEditPredictions && isQuestionCorrect(question)"
-                      class="inline-flex px-2 py-0.5 rounded-full text-xs font-bold border bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
-                    >
-                      +{{ getQuestionPointsEarned(question) }} earned
-                    </span>
                   </div>
                   <p class="text-sm text-slate-200 leading-relaxed">
                     {{ question.question_template.question }}
@@ -138,8 +108,6 @@
                     v-model="answers[question.id]"
                     :question="question"
                     :fixture="fixture"
-                    :disabled="!canEditPredictions"
-                    :is-correct="!canEditPredictions && isQuestionCorrect(question)"
                     :has-error="questionHasError(question.id)"
                   />
                 </div>
@@ -155,16 +123,15 @@
             :disabled="saving"
             @click="close"
           >
-            {{ canEditPredictions ? 'Cancel' : 'Close' }}
+            Cancel
           </button>
           <button
-            v-if="canEditPredictions"
             type="button"
             class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 text-sm font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             :disabled="isSubmitDisabled"
             @click="submit"
           >
-            {{ saving ? 'Saving…' : hasExistingPrediction ? 'Update' : 'Save' }}
+            {{ saving ? 'Saving…' : hasExistingResult ? 'Update' : 'Save' }}
           </button>
         </div>
       </div>
@@ -173,9 +140,7 @@
 </template>
 
 <script setup lang="ts">
-import type { FixtureListItem } from '~/types/fixtures'
-import type { FixtureQuestion } from '~/types/questions'
-import type { Prediction, PredictFixtureRequest, PredictionAnswer } from '~/types/predictions'
+import type { AdminFixtureListItem, AdminFixtureQuestion } from '~/types/AdminDashboardFixture'
 import { apiRoutes } from '~/utils/api'
 import { formatMatchDate } from '~/utils/fixtures'
 import {
@@ -189,25 +154,24 @@ import {
 const open = defineModel<boolean>('open', { required: true })
 
 const props = defineProps<{
-  fixture: FixtureListItem | null
-  existingPrediction: Prediction | null
+  fixture: AdminFixtureListItem | null
+  existingResult: { home_score: number; away_score: number } | null
 }>()
 
-const titleId = 'fixture-predictions-dialog-title'
+const titleId = 'admin-fixture-dialog-title'
 
-const dashboardStore = useDashboardStore()
+const adminDashboardStore = useAdminDashboardStore()
 const requestFetch = useRequestFetch()
 
-const questions = ref<FixtureQuestion[]>([])
+const questions = ref<AdminFixtureQuestion[]>([])
 const answers = ref<Record<string, string | boolean>>({})
-const savedUserAnswers = ref<PredictionAnswer[]>([])
-const predictedHomeScore = ref<number | null>(null)
-const predictedAwayScore = ref<number | null>(null)
-const hasExistingPrediction = ref(false)
+const actualHomeScore = ref<number | null>(null)
+const actualAwayScore = ref<number | null>(null)
+const hasExistingResult = ref(false)
 
 type FormSnapshot = {
-  predictedHomeScore: number | null
-  predictedAwayScore: number | null
+  actualHomeScore: number | null
+  actualAwayScore: number | null
   answers: Record<string, string>
 }
 
@@ -227,58 +191,20 @@ function questionHasError(questionId: string) {
 const scoreHasError = computed(
   () =>
     showValidationErrors.value &&
-    isScoreMissing(predictedHomeScore.value, predictedAwayScore.value),
+    isScoreMissing(actualHomeScore.value, actualAwayScore.value),
 )
 
-const scorePredictionClass = computed(() => [
+const scoreResultClass = computed(() => [
   'bg-slate-950/50 border rounded-2xl p-4 space-y-3',
   scoreHasError.value ? 'border-rose-500' : 'border-slate-800',
 ])
 
-const canEditPredictions = computed(() => props.fixture?.can_predict ?? false)
-
-const scorePointsEarned = computed(
-  () => props.existingPrediction?.points_earned ?? null,
-)
-
-const isScoreCorrect = computed(
-  () => scorePointsEarned.value != null && scorePointsEarned.value > 0,
-)
-
-const viewScoreClass = computed(() => [
-  'rounded-2xl p-4',
-  isScoreCorrect.value
-    ? 'bg-emerald-500/5 border border-emerald-500/40'
-    : 'bg-slate-950/50 border border-slate-800',
-])
-
-function getQuestionPointsEarned(question: FixtureQuestion): number | null {
-  const saved = savedUserAnswers.value.find(
-    (answer) => answer.question_template_id === question.question_template.id,
-  )
-  return saved?.points_earned ?? null
-}
-
-function isQuestionCorrect(question: FixtureQuestion): boolean {
-  const points = getQuestionPointsEarned(question)
-  return points != null && points > 0
-}
-
-function questionCardClass(question: FixtureQuestion) {
-  const base = 'rounded-2xl p-4'
-  if (!canEditPredictions.value && isQuestionCorrect(question)) {
-    return `${base} bg-emerald-500/5 border border-emerald-500/40`
-  }
-  return `${base} bg-slate-950/50 border border-slate-800`
-}
-
 function resetForm() {
   questions.value = []
   answers.value = {}
-  savedUserAnswers.value = []
-  predictedHomeScore.value = null
-  predictedAwayScore.value = null
-  hasExistingPrediction.value = false
+  actualHomeScore.value = null
+  actualAwayScore.value = null
+  hasExistingResult.value = false
   savedFormSnapshot.value = null
   formMessage.value = ''
   showValidationErrors.value = false
@@ -286,8 +212,8 @@ function resetForm() {
 
 function captureFormSnapshot() {
   savedFormSnapshot.value = {
-    predictedHomeScore: predictedHomeScore.value,
-    predictedAwayScore: predictedAwayScore.value,
+    actualHomeScore: actualHomeScore.value,
+    actualAwayScore: actualAwayScore.value,
     answers: Object.fromEntries(
       questions.value.map((q) => [q.id, stringifyAnswer(answers.value[q.id])]),
     ),
@@ -298,8 +224,8 @@ const hasFormChanges = computed(() => {
   const snapshot = savedFormSnapshot.value
   if (!snapshot) return true
 
-  if (predictedHomeScore.value !== snapshot.predictedHomeScore) return true
-  if (predictedAwayScore.value !== snapshot.predictedAwayScore) return true
+  if (actualHomeScore.value !== snapshot.actualHomeScore) return true
+  if (actualAwayScore.value !== snapshot.actualAwayScore) return true
 
   return questions.value.some(
     (q) => stringifyAnswer(answers.value[q.id]) !== snapshot.answers[q.id],
@@ -307,33 +233,29 @@ const hasFormChanges = computed(() => {
 })
 
 const isSubmitDisabled = computed(
-  () => saving.value || (hasExistingPrediction.value && !hasFormChanges.value),
+  () => saving.value || (hasExistingResult.value && !hasFormChanges.value),
 )
 
-function applyExistingPrediction(prediction: Prediction | null) {
-  if (!prediction) {
-    predictedHomeScore.value = null
-    predictedAwayScore.value = null
-    hasExistingPrediction.value = false
+function applyExistingResult(result: { home_score: number; away_score: number } | null) {
+  if (!result) {
+    actualHomeScore.value = null
+    actualAwayScore.value = null
+    hasExistingResult.value = false
     return
   }
 
-  hasExistingPrediction.value = true
-  predictedHomeScore.value = prediction.home_score
-  predictedAwayScore.value = prediction.away_score
+  hasExistingResult.value = true
+  actualHomeScore.value = result.home_score
+  actualAwayScore.value = result.away_score
 }
 
-function applyExistingAnswers(savedAnswers: { question_template_id: string; answer_value: string }[]) {
-  const answerByTemplateId = new Map(
-    savedAnswers.map((answer) => [answer.question_template_id, answer.answer_value]),
-  )
+function applyExistingAnswers(savedQuestions: AdminFixtureQuestion[]) {
   const nextAnswers: Record<string, string | boolean> = {}
 
-  for (const question of questions.value) {
-    const raw = answerByTemplateId.get(question.question_template.id) ?? ''
+  for (const question of savedQuestions) {
     nextAnswers[question.id] = parseAnswerValue(
       question.question_template.answer_type,
-      raw,
+      question.correct_answer ?? '',
     )
   }
 
@@ -344,12 +266,11 @@ function loadDialogData() {
   if (!props.fixture) return
 
   formMessage.value = ''
-  questions.value = dashboardStore.getQuestionsForFixture(props.fixture.id)
-  savedUserAnswers.value = dashboardStore.getAnswersForFixture(props.fixture.id)
-  applyExistingAnswers(savedUserAnswers.value)
-  applyExistingPrediction(props.existingPrediction ?? null)
+  questions.value = adminDashboardStore.getQuestionsForFixture(props.fixture.id)
+  applyExistingAnswers(questions.value)
+  applyExistingResult(props.existingResult ?? null)
 
-  if (hasExistingPrediction.value) {
+  if (hasExistingResult.value) {
     captureFormSnapshot()
   } else {
     savedFormSnapshot.value = null
@@ -357,51 +278,56 @@ function loadDialogData() {
 }
 
 async function submit() {
-  if (!props.fixture || !canEditPredictions.value) return
+  if (!props.fixture) return
 
   const validationError = validatePredictionForm(
-    predictedHomeScore.value,
-    predictedAwayScore.value,
+    actualHomeScore.value,
+    actualAwayScore.value,
     questions.value,
     answers.value,
   )
 
   if (validationError) {
     showValidationErrors.value = true
-    formMessage.value = validationError
+    formMessage.value = validationError.replace('predicted', 'actual')
     formMessageType.value = 'error'
     return
   }
 
   showValidationErrors.value = false
 
-  const payload: PredictFixtureRequest = {
-    home_score: predictedHomeScore.value as number,
-    away_score: predictedAwayScore.value as number,
-    answers: questions.value.map((q) => ({
-      question_template_id: q.question_template.id,
-      answer_value: stringifyAnswer(answers.value[q.id]),
-    })),
-  }
+  const homeScore = actualHomeScore.value as number
+  const awayScore = actualAwayScore.value as number
+  const answerPayload = questions.value.map((q) => ({
+    question_template_id: q.question_template.id,
+    correct_answer: stringifyAnswer(answers.value[q.id]),
+  }))
 
   saving.value = true
   formMessage.value = ''
 
   try {
-    await requestFetch(apiRoutes.predictFixture(props.fixture.id), {
+    await requestFetch(apiRoutes.adminFixtureResult(props.fixture.id), {
       method: 'POST',
-      body: payload,
+      body: { home_score: homeScore, away_score: awayScore },
     })
 
-    const prediction: Prediction = {
-      home_score: payload.home_score,
-      away_score: payload.away_score,
+    if (answerPayload.length) {
+      await requestFetch(apiRoutes.adminFixtureAnswers(props.fixture.id), {
+        method: 'POST',
+        body: { answers: answerPayload },
+      })
     }
 
-    dashboardStore.setPredictionForFixture(props.fixture.id, prediction, payload.answers)
+    adminDashboardStore.setResultForFixture(
+      props.fixture.id,
+      homeScore,
+      awayScore,
+      answerPayload,
+    )
     captureFormSnapshot()
-    hasExistingPrediction.value = true
-    formMessage.value = 'Predictions saved successfully!'
+    hasExistingResult.value = true
+    formMessage.value = 'Results saved successfully!'
     formMessageType.value = 'success'
 
     setTimeout(() => {
@@ -409,7 +335,7 @@ async function submit() {
     }, 800)
   } catch (err) {
     formMessage.value =
-      err instanceof Error ? err.message : 'Failed to save predictions.'
+      err instanceof Error ? err.message : 'Failed to save results.'
     formMessageType.value = 'error'
   } finally {
     saving.value = false
@@ -417,7 +343,7 @@ async function submit() {
 }
 
 watch(
-  () => [open.value, props.fixture?.id, props.existingPrediction] as const,
+  () => [open.value, props.fixture?.id, props.existingResult] as const,
   ([isOpen, fixtureId]) => {
     if (isOpen && fixtureId) {
       loadDialogData()

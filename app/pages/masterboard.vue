@@ -3,18 +3,16 @@
     <div>
       <div class="flex justify-between items-center mb-6">
         <div>
-          <h2 class="text-xl font-extrabold text-white">World Cup Predictions</h2>
+          <h2 class="text-xl font-extrabold text-white">World Cup Results</h2>
           <p class="text-slate-400 text-xs mt-1">
-            View fixtures and answer match questions. See
-            <NuxtLink to="/rules" class="text-emerald-400 hover:text-emerald-300">rules</NuxtLink>
-            for scoring.
+            Enter match results and correct answers for bonus questions.
           </p>
         </div>
         <div
           class="flex items-center space-x-2 bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-400"
         >
-          <UIcon name="i-heroicons-clock" class="w-4 h-4 text-emerald-400" />
-          <span>Predictions lock at kick-off (IST)</span>
+          <UIcon name="i-heroicons-shield-check" class="w-4 h-4 text-emerald-400" />
+          <span>Admin — results trigger point recalculation</span>
         </div>
       </div>
 
@@ -51,54 +49,52 @@
           :key="item.fixture.id"
           class="scroll-mt-24"
         >
-          <FixturePredictionCard
+          <AdminFixtureCard
             :fixture="item.fixture"
-            :prediction="item.prediction"
-            :answers="item.answers"
-            @open-predictions="openPredictions(item)"
+            :actual-result="item.actual_result"
+            @open-results="openResults(item)"
           />
         </div>
       </div>
     </div>
 
-    <FixturePredictionsDialog
-      v-model:open="isPredictionsOpen"
+    <AdminFixtureDialog
+      v-model:open="isResultsOpen"
       :fixture="selectedFixture"
-      :existing-prediction="selectedPrediction"
+      :existing-result="selectedResult"
     />
   </div>
 </template>
 
 <script setup lang="ts">
-import type { DashboardFixture } from '~/types/DashboardFixture'
-import type { FixtureListItem } from '~/types/fixtures'
-import type { Prediction } from '~/types/predictions'
+import type { AdminDashboardFixture } from '~/types/AdminDashboardFixture'
+import type { AdminFixtureListItem } from '~/types/AdminDashboardFixture'
 import { apiRoutes } from '~/utils/api'
 import {
-  findFirstScheduledFixture,
+  findFirstScheduledAdminFixture,
   fixtureCardElementId,
-  normalizeFixturesResponse,
+  normalizeAdminFixturesResponse,
   scrollToFixtureCard,
-} from '~/utils/dashboard'
+} from '~/utils/adminDashboard'
 
 definePageMeta({
-  layout: 'auth',
+  middleware: 'admin',
+  layout: 'admin',
 })
 
-const user = useSupabaseUser()
 const requestFetch = useRequestFetch()
-const dashboardStore = useDashboardStore()
+const adminDashboardStore = useAdminDashboardStore()
 
 const {
   data: fixturesResponse,
   pending: fixturesPending,
   error: fixturesError,
-} = await useFetch(apiRoutes.fixtures, {
-  key: 'dashboard-fixtures',
+} = await useFetch(apiRoutes.adminFixtures, {
+  key: 'admin-dashboard-fixtures',
   $fetch: requestFetch as typeof $fetch,
   transform: (data) =>
-    normalizeFixturesResponse(
-      (data ?? []) as Parameters<typeof normalizeFixturesResponse>[0],
+    normalizeAdminFixturesResponse(
+      (data ?? []) as Parameters<typeof normalizeAdminFixturesResponse>[0],
     ),
 })
 
@@ -106,26 +102,26 @@ watch(
   fixturesResponse,
   (items) => {
     if (items) {
-      dashboardStore.setItems(items)
+      adminDashboardStore.setItems(items)
     }
   },
   { immediate: true },
 )
 
-const dashboardItems = computed((): DashboardFixture[] => dashboardStore.items.value)
+const dashboardItems = computed((): AdminDashboardFixture[] => adminDashboardStore.items.value)
 
-const isPredictionsOpen = ref(false)
-const selectedFixture = ref<FixtureListItem | null>(null)
-const selectedPrediction = ref<Prediction | null>(null)
+const isResultsOpen = ref(false)
+const selectedFixture = ref<AdminFixtureListItem | null>(null)
+const selectedResult = ref<{ home_score: number; away_score: number } | null>(null)
 
-function openPredictions(item: DashboardFixture) {
+function openResults(item: AdminDashboardFixture) {
   selectedFixture.value = item.fixture
-  selectedPrediction.value = item.prediction
-  isPredictionsOpen.value = true
+  selectedResult.value = item.actual_result
+  isResultsOpen.value = true
 }
 
 function scrollToFirstScheduledMatch(smooth = false) {
-  const first = findFirstScheduledFixture(dashboardItems.value)
+  const first = findFirstScheduledAdminFixture(dashboardItems.value)
   if (!first) {
     return
   }
@@ -143,17 +139,13 @@ watch(
   },
 )
 
-watch(isPredictionsOpen, (open, wasOpen) => {
+watch(isResultsOpen, (open, wasOpen) => {
   if (wasOpen && !open) {
     scrollToFirstScheduledMatch(true)
   }
 })
 
 onMounted(() => {
-  if (!user.value) {
-    navigateTo('/login')
-    return
-  }
   if (!fixturesPending.value && dashboardItems.value.length) {
     scrollToFirstScheduledMatch()
   }

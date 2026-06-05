@@ -24,7 +24,7 @@ export default defineEventHandler(async (event) => {
     // 2. User's score predictions
     const { data: userPredictions } = await supabase
         .from("score_prediction")
-        .select("fixture_id, home_score, away_score")
+        .select("fixture_id, home_score, away_score, points_earned")
         .in("fixture_id", fixtureIds)
         .eq("user_id", user.sub);
 
@@ -33,13 +33,14 @@ export default defineEventHandler(async (event) => {
         predictionMap.set(p.fixture_id, {
             home_score: p.home_score,
             away_score: p.away_score,
+            points_earned: p.points_earned ?? 0,
         }),
     );
 
     // 3. User's answers to fixture questions
     const { data: userAnswers } = await supabase
         .from("prediction_answer")
-        .select("fixture_id, question_template_id, answer_value")
+        .select("fixture_id, question_template_id, answer_value, points_earned")
         .in("fixture_id", fixtureIds)
         .eq("user_id", user.sub);
 
@@ -49,6 +50,7 @@ export default defineEventHandler(async (event) => {
         answersMap.get(a.fixture_id).push({
             question_template_id: a.question_template_id,
             answer_value: a.answer_value,
+            points_earned: a.points_earned ?? 0,
         });
     });
 

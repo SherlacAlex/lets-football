@@ -20,6 +20,18 @@ type RawFixtureQuestion = {
   display_order: number
 }
 
+type RawPrediction = {
+  home_score: number
+  away_score: number
+  points_earned?: number
+}
+
+type RawPredictionAnswer = {
+  question_template_id: string
+  answer_value: string
+  points_earned?: number
+}
+
 type RawFixtureRow = {
   id: string
   group_name?: string | null
@@ -30,8 +42,8 @@ type RawFixtureRow = {
   away_score?: number | null
   home_team: RawTeam
   away_team: RawTeam
-  user_prediction: Prediction | null
-  user_answers?: PredictionAnswer[]
+  user_prediction: RawPrediction | null
+  user_answers?: RawPredictionAnswer[]
   can_predict: boolean
   questions?: RawFixtureQuestion[]
 }
