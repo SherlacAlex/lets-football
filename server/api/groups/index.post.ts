@@ -1,87 +1,35 @@
 import { serverSupabaseClient, serverSupabaseUser } from "#supabase/server";
-
-function generateInviteCode() {
-    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-
-    return Array.from({ length: 6 })
-        .map(() => chars[Math.floor(Math.random() * chars.length)])
-        .join("");
-}
+import { customAlphabet } from "nanoid";
 
 export default defineEventHandler(async (event) => {
-    const client = await serverSupabaseClient(event);
+    const supabase = await serverSupabaseClient(event);
     const user = await serverSupabaseUser(event);
+    if (!user) throw createError({ statusCode: 401, message: "Unauthorized" });
 
-    if (!user) {
-        throw createError({
-            statusCode: 401,
-            statusMessage: "Unauthorized",
-        });
-    }
+    const { name } = await readBody(event);
+    if (!name)
+        throw createError({ statusCode: 400, message: "League name required" });
 
-    const userId = user.sub;
-    const body = await readBody(event);
+    const inviteCode = customAlphabet(
+        "ABCDEFGHJKLMNPQRSTUVWXYZ0123456789",
+        6,
+    )();
 
-    if (!body.name?.trim()) {
-        throw createError({
-            statusCode: 400,
-            statusMessage: "Group name is required",
-        });
-    }
+    const { data: group, error: groupError } = await supabase
+        .from("groups")
+        .insert({ name, invite_code: inviteCode, created_by: user.sub })
+        .select()
+        .single();
 
-    let group;
-    let inviteCode;
+    if (groupError)
+        throw createError({ statusCode: 500, message: groupError.message });
 
-    // Retry in case invite code already exists
-    for (let i = 0; i < 5; i++) {
-        inviteCode = generateInviteCode();
+    const { error: memberError } = await supabase
+        .from("group_members")
+        .insert({ group_id: group.id, user_id: user.sub, role: "admin" });
 
-        const { data, error } = await client
-            .from("groups")
-            .insert({
-                name: body.name.trim(),
-                invite_code: inviteCode,
-                created_by: userId,
-            })
-            .select()
-            .single();
+    if (memberError)
+        throw createError({ statusCode: 500, message: memberError.message });
 
-        if (!error) {
-            group = data;
-            break;
-        }
-
-        // Unique constraint violation
-        if (error.code !== "23505") {
-            throw createError({
-                statusCode: 500,
-                statusMessage: error.message,
-            });
-        }
-    }
-
-    if (!group) {
-        throw createError({
-            statusCode: 500,
-            statusMessage: "Failed to generate unique invite code",
-        });
-    }
-
-    const { error: memberError } = await client.from("group_members").insert({
-        group_id: group.id,
-        user_id: userId,
-        role: "admin",
-    });
-
-    if (memberError) {
-        throw createError({
-            statusCode: 500,
-            statusMessage: memberError.message,
-        });
-    }
-
-    return {
-        success: true,
-        data: group,
-    };
+    return group;
 });

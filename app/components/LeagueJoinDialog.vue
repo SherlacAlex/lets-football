@@ -51,9 +51,9 @@
               v-model="inviteCode"
               type="text"
               required
-              maxlength="6"
+              maxlength="8"
               autocomplete="off"
-              placeholder="6-character code"
+              placeholder="8-character code"
               class="w-full bg-slate-950/60 border border-slate-800 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-2xl py-3 px-4 text-white placeholder-slate-600 focus:outline-none transition-all duration-200 uppercase tracking-widest text-center font-bold"
               @input="inviteCode = inviteCode.toUpperCase().replace(/[^A-Z0-9]/g, '')"
             />
@@ -117,19 +117,12 @@ async function submit() {
   formMessage.value = ''
 
   try {
-    const response = await $fetch<{ message?: string; data?: { groupName?: string } }>(
-      apiRoutes.joinGroup,
-      {
-        method: 'POST',
-        body: { inviteCode: code },
-      },
-    )
+    await $fetch(apiRoutes.joinGroup, {
+      method: 'POST',
+      body: { invite_code: code },
+    })
     formMessageType.value = 'success'
-    formMessage.value =
-      response.message ??
-      (response.data?.groupName
-        ? `Joined "${response.data.groupName}" successfully.`
-        : 'Joined the league successfully.')
+    formMessage.value = 'Joined the league successfully.'
     emit('joined')
     setTimeout(() => {
       open.value = false

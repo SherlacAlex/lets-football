@@ -1,4 +1,5 @@
 import type { FixtureQuestion } from '~/types/questions'
+import type { QuestionAnswerType } from '~/types/questions'
 
 export type AnswerValue = string | boolean | null | undefined
 
@@ -6,6 +7,23 @@ export function stringifyAnswer(value: AnswerValue): string {
   if (value == null) return ''
   if (typeof value === 'boolean') return value ? 'true' : 'false'
   return String(value).trim()
+}
+
+export function parseAnswerValue(
+  answerType: QuestionAnswerType,
+  answerValue: string,
+): string | boolean {
+  if (!answerValue.trim()) {
+    return ''
+  }
+
+  if (answerType === 'BOOLEAN') {
+    if (answerValue === 'true') return true
+    if (answerValue === 'false') return false
+    return ''
+  }
+
+  return answerValue
 }
 
 export function isQuestionUnanswered(

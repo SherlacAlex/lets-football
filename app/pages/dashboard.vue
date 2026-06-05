@@ -11,54 +11,72 @@
           </p>
         </div>
         <div
-          class="flex items-center space-x-2 bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-400">
+          class="flex items-center space-x-2 bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-400"
+        >
           <UIcon name="i-heroicons-clock" class="w-4 h-4 text-emerald-400" />
           <span>Predictions lock at kick-off (IST)</span>
         </div>
       </div>
 
-      <div v-if="dashboardError"
-        class="p-4 mb-6 rounded-2xl border border-rose-500/20 bg-rose-500/10 text-rose-400 text-sm flex items-start gap-2">
+      <div
+        v-if="fixturesError"
+        class="p-4 mb-6 rounded-2xl border border-rose-500/20 bg-rose-500/10 text-rose-400 text-sm flex items-start gap-2"
+      >
         <UIcon name="i-heroicons-exclamation-triangle" class="w-5 h-5 shrink-0 mt-0.5" />
-        <span>Could not load dashboard. {{ dashboardError.message }}</span>
+        <span>Could not load fixtures. {{ fixturesError.message }}</span>
       </div>
 
-      <div v-if="dashboardPending" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div v-if="fixturesPending" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <AppCard v-for="n in 4" :key="n" class="animate-pulse !hover:border-slate-800">
-          <div class="h-4 bg-slate-800 rounded w-1/3 mb-6"></div>
-          <div class="h-16 bg-slate-800/60 rounded-2xl"></div>
+          <div class="h-4 bg-slate-800 rounded w-1/3 mb-6" />
+          <div class="h-16 bg-slate-800/60 rounded-2xl" />
         </AppCard>
       </div>
 
-      <div v-else-if="!dashboardItems.length"
-        class="text-center py-16 bg-slate-900/40 border border-slate-800/80 rounded-3xl">
+      <div
+        v-else-if="!dashboardItems.length"
+        class="text-center py-16 bg-slate-900/40 border border-slate-800/80 rounded-3xl"
+      >
         <UIcon name="i-heroicons-calendar-days" class="w-12 h-12 text-slate-600 mx-auto mb-4" />
         <p class="text-slate-400 text-sm">No fixtures scheduled yet. Check back soon.</p>
       </div>
 
-      <div v-if="!dashboardPending && dashboardItems.length" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div v-for="item in dashboardItems" :id="fixtureCardElementId(item.fixture.id)" :key="item.fixture.id"
-          class="scroll-mt-24">
-          <FixturePredictionCard :fixture="item.fixture" :prediction="item.prediction"
-            @open-predictions="openPredictions(item)" />
+      <div
+        v-if="!fixturesPending && dashboardItems.length"
+        class="grid grid-cols-1 lg:grid-cols-2 gap-6"
+      >
+        <div
+          v-for="item in dashboardItems"
+          :id="fixtureCardElementId(item.fixture.id)"
+          :key="item.fixture.id"
+          class="scroll-mt-24"
+        >
+          <FixturePredictionCard
+            :fixture="item.fixture"
+            :prediction="item.prediction"
+            @open-predictions="openPredictions(item)"
+          />
         </div>
       </div>
     </div>
 
-    <FixturePredictionsDialog v-model:open="isPredictionsOpen" :fixture="selectedFixture"
-      :existing-prediction="selectedPrediction" />
+    <FixturePredictionsDialog
+      v-model:open="isPredictionsOpen"
+      :fixture="selectedFixture"
+      :existing-prediction="selectedPrediction"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import type { DashboardFixture } from '~/types/DashboardFixture'
-import type { Fixture } from '~/types/fixtures'
+import type { FixtureListItem } from '~/types/fixtures'
 import type { Prediction } from '~/types/predictions'
 import { apiRoutes } from '~/utils/api'
 import {
   findFirstScheduledFixture,
   fixtureCardElementId,
-  normalizeDashboard,
+  normalizeFixturesResponse,
   scrollToFixtureCard,
 } from '~/utils/dashboard'
 
@@ -68,23 +86,23 @@ definePageMeta({
 
 const user = useSupabaseUser()
 const requestFetch = useRequestFetch()
-
 const dashboardStore = useDashboardStore()
 
 const {
-  data: dashboardResponse,
-  pending: dashboardPending,
-  error: dashboardError,
-} = await useFetch(apiRoutes.dashboard, {
+  data: fixturesResponse,
+  pending: fixturesPending,
+  error: fixturesError,
+} = await useFetch(apiRoutes.fixtures, {
+  key: 'dashboard-fixtures',
   $fetch: requestFetch as typeof $fetch,
   transform: (data) =>
-    normalizeDashboard(
-      (data ?? []) as unknown as Parameters<typeof normalizeDashboard>[0],
+    normalizeFixturesResponse(
+      (data ?? []) as Parameters<typeof normalizeFixturesResponse>[0],
     ),
 })
 
 watch(
-  dashboardResponse,
+  fixturesResponse,
   (items) => {
     if (items) {
       dashboardStore.setItems(items)
@@ -96,7 +114,7 @@ watch(
 const dashboardItems = computed((): DashboardFixture[] => dashboardStore.items.value)
 
 const isPredictionsOpen = ref(false)
-const selectedFixture = ref<Fixture | null>(null)
+const selectedFixture = ref<FixtureListItem | null>(null)
 const selectedPrediction = ref<Prediction | null>(null)
 
 function openPredictions(item: DashboardFixture) {
@@ -116,7 +134,7 @@ function scrollToFirstScheduledMatch(smooth = false) {
 }
 
 watch(
-  () => dashboardPending.value,
+  () => fixturesPending.value,
   (pending, wasPending) => {
     if (wasPending && !pending && dashboardItems.value.length) {
       scrollToFirstScheduledMatch()
@@ -135,7 +153,7 @@ onMounted(() => {
     navigateTo('/login')
     return
   }
-  if (!dashboardPending.value && dashboardItems.value.length) {
+  if (!fixturesPending.value && dashboardItems.value.length) {
     scrollToFirstScheduledMatch()
   }
 })

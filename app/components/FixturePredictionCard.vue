@@ -44,7 +44,7 @@
     >
       Your pick:
       <span class="text-slate-300 font-semibold tabular-nums">
-        {{ prediction.predictedHomeScore }} – {{ prediction.predictedAwayScore }}
+        {{ prediction.home_score }} – {{ prediction.away_score }}
       </span>
     </div>
 
@@ -61,12 +61,12 @@
 </template>
 
 <script setup lang="ts">
-import type { Fixture } from '~/types/fixtures'
+import type { FixtureListItem } from '~/types/fixtures'
 import type { Prediction } from '~/types/predictions'
 import { formatMatchDate, statusBadgeClass, statusLabel } from '~/utils/fixtures'
 
 defineProps<{
-  fixture: Fixture
+  fixture: FixtureListItem
   prediction: Prediction | null
 }>()
 

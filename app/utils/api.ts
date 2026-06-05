@@ -1,11 +1,15 @@
 export const apiRoutes = {
     fixtures: "/api/fixtures",
-    fixtureQuestions: (fixtureId: string) =>
-        `/api/fixtures/${fixtureId}/questions`,
-    fixturePrediction: (fixtureId: string) => `/api/predictions/${fixtureId}`,
-    createPrediction: "/api/predictions",
-    updatePrediction: (predictionId: string) => `/api/predictions/${predictionId}`,
-    dashboard: "/api/dashboard",
+    predictFixture: (fixtureId: string) => `/api/fixtures/${fixtureId}/predict`,
     groups: "/api/groups",
     joinGroup: "/api/groups/join",
+    groupDetail: (groupId: string) => `/api/groups/${groupId}`,
+    memberPredictions: (groupId: string, userId: string) =>
+        `/api/groups/${groupId}/members/${userId}/predictions`,
+    memberFixturePrediction: (
+        groupId: string,
+        userId: string,
+        fixtureId: string,
+    ) =>
+        `/api/groups/${groupId}/members/${userId}/fixtures/${fixtureId}/prediction`,
 } as const;

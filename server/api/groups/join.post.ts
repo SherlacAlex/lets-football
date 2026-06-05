@@ -1,69 +1,80 @@
 import { serverSupabaseClient, serverSupabaseUser } from "#supabase/server";
 
 export default defineEventHandler(async (event) => {
-    const client = await serverSupabaseClient(event);
+    const supabase = await serverSupabaseClient(event);
     const user = await serverSupabaseUser(event);
 
-    if (!user) {
+    // Validate authentication
+    if (!user || !user.sub) {
         throw createError({
             statusCode: 401,
-            statusMessage: "Unauthorized",
+            message: "Unauthorized or invalid user ID",
         });
     }
 
-    const userId = user.sub;
-    const body = await readBody(event);
-
-    const inviteCode = body.inviteCode?.trim()?.toUpperCase();
-
-    if (!inviteCode) {
+    const { invite_code } = await readBody(event);
+    if (!invite_code || typeof invite_code !== "string") {
         throw createError({
             statusCode: 400,
-            statusMessage: "Invite code is required",
+            message: "Valid invite code required",
         });
     }
 
-    const { data: group, error: groupError } = await client
+    // Find group by invite code
+    const { data: group, error: findError } = await supabase
         .from("groups")
-        .select("id, name")
-        .eq("invite_code", inviteCode)
-        .single();
+        .select("id")
+        .eq("invite_code", invite_code)
+        .maybeSingle();
 
-    if (groupError || !group) {
+    if (findError) {
+        console.error("Group lookup error:", findError);
         throw createError({
-            statusCode: 404,
-            statusMessage: "Invalid invite code",
+            statusCode: 500,
+            message: "Database error looking up group",
         });
     }
 
-    const { error: memberError } = await client.from("group_members").insert({
+    if (!group || !group.id) {
+        throw createError({ statusCode: 404, message: "Invalid invite code" });
+    }
+
+    // Check if user is already a member
+    const { data: existing, error: checkError } = await supabase
+        .from("group_members")
+        .select("id")
+        .eq("group_id", group.id)
+        .eq("user_id", user.sub)
+        .maybeSingle();
+
+    if (checkError) {
+        console.error("Membership check error:", checkError);
+        throw createError({
+            statusCode: 500,
+            message: "Error checking membership",
+        });
+    }
+
+    if (existing) {
+        // Already a member – return success
+        return { success: true, group_id: group.id, already_member: true };
+    }
+
+    // Insert new member – ensure both IDs are valid
+    const { error: insertError } = await supabase.from("group_members").insert({
         group_id: group.id,
-        user_id: userId,
+        user_id: user.sub,
         role: "member",
     });
 
-    if (memberError) {
-        // Unique constraint violation:
-        // user already belongs to this group
-        if (memberError.code === "23505") {
-            throw createError({
-                statusCode: 409,
-                statusMessage: "You are already a member of this group",
-            });
+    if (insertError) {
+        console.error("Insert error:", insertError);
+        // Check if it's a duplicate key error (PostgreSQL code 23505)
+        if (insertError.code === "23505") {
+            return { success: true, group_id: group.id, already_member: true };
         }
-
-        throw createError({
-            statusCode: 500,
-            statusMessage: memberError.message,
-        });
+        throw createError({ statusCode: 500, message: insertError.message });
     }
 
-    return {
-        success: true,
-        message: "Successfully joined group",
-        data: {
-            groupId: group.id,
-            groupName: group.name,
-        },
-    };
+    return { success: true, group_id: group.id };
 });

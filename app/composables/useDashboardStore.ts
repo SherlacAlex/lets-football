@@ -1,6 +1,6 @@
 import type { DashboardFixture } from '~/types/DashboardFixture'
 import type { FixtureQuestion } from '~/types/questions'
-import type { Prediction } from '~/types/predictions'
+import type { Prediction, PredictionAnswer } from '~/types/predictions'
 
 export function useDashboardStore() {
   const items = useState<DashboardFixture[]>('dashboard-items', () => [])
@@ -13,9 +13,27 @@ export function useDashboardStore() {
     return items.value.find((item) => item.fixture.id === fixtureId)?.questions ?? []
   }
 
-  function setPredictionForFixture(fixtureId: string, prediction: Prediction) {
+  function getAnswersForFixture(fixtureId: string): PredictionAnswer[] {
+    return items.value.find((item) => item.fixture.id === fixtureId)?.answers ?? []
+  }
+
+  function setPredictionForFixture(
+    fixtureId: string,
+    prediction: Prediction,
+    answers?: PredictionAnswer[],
+  ) {
     items.value = items.value.map((item) =>
-      item.fixture.id === fixtureId ? { ...item, prediction } : item,
+      item.fixture.id === fixtureId
+        ? {
+            ...item,
+            prediction,
+            answers: answers ?? item.answers,
+            fixture: {
+              ...item.fixture,
+              user_prediction: prediction,
+            },
+          }
+        : item,
     )
   }
 
@@ -23,6 +41,7 @@ export function useDashboardStore() {
     items,
     setItems,
     getQuestionsForFixture,
+    getAnswersForFixture,
     setPredictionForFixture,
   }
 }

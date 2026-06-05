@@ -1,128 +1,111 @@
-import type { DashboardFixture } from "~/types/DashboardFixture";
-import type { Fixture, Team } from "~/types/fixtures";
-import type { FixtureQuestion, QuestionTemplate } from "~/types/questions";
+import type { DashboardFixture } from '~/types/DashboardFixture'
+import type { FixtureListItem, Team } from '~/types/fixtures'
+import type { FixtureQuestion } from '~/types/questions'
+import type { Prediction, PredictionAnswer } from '~/types/predictions'
 
 type RawTeam = {
-    id: string;
-    name: string;
-    short_name?: string;
-    fifa_code?: string;
-    flag_url?: string | null;
-};
-
-type RawFixture = {
-    id: string;
-    group_name?: string | null;
-    match_date: string;
-    venue?: string | null;
-    status?: Fixture["status"];
-    home_score?: number | null;
-    away_score?: number | null;
-    home_team: RawTeam;
-    away_team: RawTeam;
-};
-
-function normalizeTeam(team: RawTeam): Team {
-    return {
-        id: team.id,
-        name: team.name,
-        short_name: team.short_name ?? team.name,
-        fifa_code: team.fifa_code ?? "",
-        flag_url: team.flag_url ?? null,
-    };
+  id: string
+  name: string
+  short_name?: string
+  fifa_code?: string
+  flag_url?: string | null
 }
-
-type RawQuestionTemplate = QuestionTemplate | QuestionTemplate[] | null;
 
 type RawFixtureQuestion = {
-    id: string;
-    points: number;
-    display_order: number;
-    question_template: RawQuestionTemplate;
-};
+  question_template_id: string
+  code: string
+  question: string
+  answer_type: FixtureQuestion['question_template']['answer_type']
+  points_value: number
+  display_order: number
+}
 
-function normalizeQuestionTemplate(
-    raw: RawQuestionTemplate,
-): QuestionTemplate | null {
-    if (Array.isArray(raw)) {
-        return raw[0] ?? null;
+type RawFixtureRow = {
+  id: string
+  group_name?: string | null
+  match_date: string
+  venue?: string | null
+  status?: FixtureListItem['status']
+  home_score?: number | null
+  away_score?: number | null
+  home_team: RawTeam
+  away_team: RawTeam
+  user_prediction: Prediction | null
+  user_answers?: PredictionAnswer[]
+  can_predict: boolean
+  questions?: RawFixtureQuestion[]
+}
+
+function normalizeTeam(team: RawTeam): Team {
+  return {
+    id: team.id,
+    name: team.name,
+    short_name: team.short_name ?? team.name,
+    fifa_code: team.fifa_code ?? '',
+    flag_url: team.flag_url ?? null,
+  }
+}
+
+function normalizeQuestions(questions: RawFixtureQuestion[] = []): FixtureQuestion[] {
+  return [...questions]
+    .sort((a, b) => a.display_order - b.display_order)
+    .map((question) => ({
+      id: question.question_template_id,
+      points: question.points_value,
+      display_order: question.display_order,
+      question_template: {
+        id: question.question_template_id,
+        code: question.code,
+        question: question.question,
+        answer_type: question.answer_type,
+      },
+    }))
+}
+
+export function normalizeFixturesResponse(rows: RawFixtureRow[]): DashboardFixture[] {
+  return rows.map((row) => {
+    const fixture: FixtureListItem = {
+      id: row.id,
+      group_name: row.group_name ?? null,
+      match_date: row.match_date,
+      venue: row.venue ?? null,
+      status: row.status ?? 'scheduled',
+      home_score: row.home_score ?? null,
+      away_score: row.away_score ?? null,
+      home_team: normalizeTeam(row.home_team),
+      away_team: normalizeTeam(row.away_team),
+      user_prediction: row.user_prediction,
+      can_predict: row.can_predict,
     }
-    return raw ?? null;
-}
 
-function normalizeFixtureQuestion(
-    raw: RawFixtureQuestion,
-): FixtureQuestion | null {
-    const question_template = normalizeQuestionTemplate(raw.question_template);
-    if (!question_template) {
-        return null;
+    const questions = normalizeQuestions(row.questions)
+
+    return {
+      fixture,
+      prediction: row.user_prediction,
+      questions,
+      answers: row.user_answers ?? [],
     }
-
-    return {
-        id: raw.id,
-        points: raw.points,
-        display_order: raw.display_order,
-        question_template,
-    };
-}
-
-export function normalizeFixture(raw: RawFixture): Fixture {
-    return {
-        id: raw.id,
-        group_name: raw.group_name ?? null,
-        match_date: raw.match_date,
-        venue: raw.venue ?? null,
-        status: raw.status ?? "scheduled",
-        home_score: raw.home_score ?? null,
-        away_score: raw.away_score ?? null,
-        home_team: normalizeTeam(raw.home_team),
-        away_team: normalizeTeam(raw.away_team),
-    };
-}
-
-export function normalizeDashboardItem(item: {
-    fixture: RawFixture;
-    prediction: DashboardFixture["prediction"];
-    questions?: RawFixtureQuestion[];
-}): DashboardFixture {
-    const questions = (item.questions ?? [])
-        .map(normalizeFixtureQuestion)
-        .filter((q): q is FixtureQuestion => q !== null);
-
-    return {
-        fixture: normalizeFixture(item.fixture),
-        prediction: item.prediction,
-        questions,
-    };
-}
-
-export function normalizeDashboard(
-    items: Array<{
-        fixture: RawFixture;
-        prediction: DashboardFixture["prediction"];
-        questions?: RawFixtureQuestion[];
-    }>,
-): DashboardFixture[] {
-    return items.map(normalizeDashboardItem);
+  })
 }
 
 export function findFirstScheduledFixture(
-    items: DashboardFixture[],
+  items: DashboardFixture[],
 ): DashboardFixture | undefined {
-    return items.find((item) => item.fixture.status === "scheduled");
+  return items.find((item) => item.fixture.status === 'scheduled')
 }
 
 export function fixtureCardElementId(fixtureId: string): string {
-    return `fixture-card-${fixtureId}`;
+  return `fixture-card-${fixtureId}`
 }
 
 export function scrollToFixtureCard(fixtureId: string, smooth = false): void {
-    if (!import.meta.client) {
-        return;
-    }
-    const el = document.getElementById(fixtureCardElementId(fixtureId));
-    el?.scrollIntoView({
-        behavior: smooth ? "smooth" : "instant",
-        block: "start",
-    });
+  if (!import.meta.client) {
+    return
+  }
+  const el = document.getElementById(fixtureCardElementId(fixtureId))
+  el?.scrollIntoView({
+    behavior: smooth ? 'smooth' : 'instant',
+    block: 'start',
+  })
 }

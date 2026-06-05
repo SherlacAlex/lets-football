@@ -1,9 +1,10 @@
-import type { Fixture } from './fixtures'
-import type { Prediction } from './predictions'
+import type { FixtureListItem } from './fixtures'
+import type { Prediction, PredictionAnswer } from './predictions'
 import type { FixtureQuestion } from './questions'
 
 export interface DashboardFixture {
-  fixture: Fixture
+  fixture: FixtureListItem
   prediction: Prediction | null
   questions: FixtureQuestion[]
+  answers: PredictionAnswer[]
 }

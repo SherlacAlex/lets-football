@@ -1,34 +1,24 @@
-export interface PredictionAnswer {
-  fixtureQuestionId: string
-  answer: string
+export interface PredictAnswerPayload {
+  question_template_id: string
+  answer_value: string
 }
 
-export interface SavePredictionRequest {
-  fixtureId: string
-  predictedHomeScore: number
-  predictedAwayScore: number
-  answers: PredictionAnswer[]
+export interface PredictFixtureRequest {
+  home_score: number
+  away_score: number
+  answers: PredictAnswerPayload[]
+}
+
+export interface PredictFixtureResponse {
+  success: boolean
 }
 
 export interface Prediction {
-  id: string
-  predictedHomeScore: number | null
-  predictedAwayScore: number | null
-  answers: PredictionAnswer[]
+  home_score: number
+  away_score: number
 }
 
-export interface PredictionMutationResponse {
-  success: boolean
-  fixtureId: string
-  prediction: Prediction
+export interface PredictionAnswer {
+  question_template_id: string
+  answer_value: string
 }
-
-export interface SavePredictionResponse extends PredictionMutationResponse {}
-
-export interface UpdatePredictionRequest {
-  predictedHomeScore: number
-  predictedAwayScore: number
-  answers: PredictionAnswer[]
-}
-
-export interface UpdatePredictionResponse extends PredictionMutationResponse {}

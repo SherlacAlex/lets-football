@@ -19,3 +19,13 @@ export interface Fixture {
   home_team: Team
   away_team: Team
 }
+
+export interface UserScorePrediction {
+  home_score: number
+  away_score: number
+}
+
+export interface FixtureListItem extends Fixture {
+  user_prediction: UserScorePrediction | null
+  can_predict: boolean
+}
