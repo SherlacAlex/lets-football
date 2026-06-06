@@ -180,6 +180,7 @@ const handleRegister = async () => {
 
     if (error) {
       errorMessage.value = error.message
+      debugger
     } else {
       successMessage.value = 'Registration successful! Please check your email or redirecting to dashboard...'
 
