@@ -29,13 +29,16 @@ export default defineEventHandler(async (event) => {
         .eq("user_id", user.sub);
 
     const predictionMap = new Map();
-    userPredictions?.forEach((p) =>
+    let totalScorePoints = 0;
+    userPredictions?.forEach((p) => {
+        const points = p.points_earned ?? 0;
+        totalScorePoints += points;
         predictionMap.set(p.fixture_id, {
             home_score: p.home_score,
             away_score: p.away_score,
-            points_earned: p.points_earned ?? 0,
-        }),
-    );
+            points_earned: points,
+        });
+    });
 
     // 3. User's answers to fixture questions
     const { data: userAnswers } = await supabase
@@ -45,14 +48,19 @@ export default defineEventHandler(async (event) => {
         .eq("user_id", user.sub);
 
     const answersMap = new Map();
+    let totalAnswerPoints = 0;
     userAnswers?.forEach((a) => {
+        const points = a.points_earned ?? 0;
+        totalAnswerPoints += points;
         if (!answersMap.has(a.fixture_id)) answersMap.set(a.fixture_id, []);
         answersMap.get(a.fixture_id).push({
             question_template_id: a.question_template_id,
             answer_value: a.answer_value,
-            points_earned: a.points_earned ?? 0,
+            points_earned: points,
         });
     });
+
+    const userTotalPoints = totalScorePoints + totalAnswerPoints;
 
     // 4. Question templates assigned to each fixture
     const { data: fixtureQuestions, error: qError } = await supabase
@@ -99,5 +107,9 @@ export default defineEventHandler(async (event) => {
         questions: questionsByFixture.get(f.id) || [],
     }));
 
-    return enriched;
+    // Return fixtures array plus the user's total points
+    return {
+        fixtures: enriched,
+        user_total_points: userTotalPoints,
+    };
 });

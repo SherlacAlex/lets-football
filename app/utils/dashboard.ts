@@ -74,7 +74,12 @@ function normalizeQuestions(questions: RawFixtureQuestion[] = []): FixtureQuesti
     }))
 }
 
-export function normalizeFixturesResponse(rows: RawFixtureRow[]): DashboardFixture[] {
+export type FixturesApiData = {
+  items: DashboardFixture[]
+  userTotalPoints: number
+}
+
+function normalizeFixtureRows(rows: RawFixtureRow[]): DashboardFixture[] {
   return rows.map((row) => {
     const fixture: FixtureListItem = {
       id: row.id,
@@ -99,6 +104,30 @@ export function normalizeFixturesResponse(rows: RawFixtureRow[]): DashboardFixtu
       answers: row.user_answers ?? [],
     }
   })
+}
+
+/** @deprecated Use parseFixturesApiResponse */
+export function normalizeFixturesResponse(rows: RawFixtureRow[]): DashboardFixture[] {
+  return normalizeFixtureRows(rows)
+}
+
+export function parseFixturesApiResponse(data: unknown): FixturesApiData {
+  if (Array.isArray(data)) {
+    return {
+      items: normalizeFixtureRows(data),
+      userTotalPoints: 0,
+    }
+  }
+
+  const payload = data as {
+    fixtures?: RawFixtureRow[]
+    user_total_points?: number
+  }
+
+  return {
+    items: normalizeFixtureRows(payload.fixtures ?? []),
+    userTotalPoints: payload.user_total_points ?? 0,
+  }
 }
 
 export function findFirstScheduledFixture(

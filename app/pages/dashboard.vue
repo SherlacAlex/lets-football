@@ -1,20 +1,31 @@
 <template>
   <div class="space-y-8">
     <div>
-      <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between mb-4 sm:mb-6">
-        <div class="min-w-0">
-          <h2 class="text-lg sm:text-xl font-extrabold text-white">World Cup Predictions</h2>
-          <p class="text-slate-400 text-xs mt-1">
-            View fixtures and answer match questions. See
-            <NuxtLink to="/rules" class="text-emerald-400 hover:text-emerald-300">rules</NuxtLink>
-            for scoring.
-          </p>
-        </div>
-        <div
-          class="flex items-center gap-2 bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-400 shrink-0 self-start"
-        >
-          <UIcon name="i-heroicons-clock" class="w-4 h-4 text-emerald-400 shrink-0" />
-          <span class="leading-snug">Predictions lock at kick-off (IST)</span>
+      <div
+        class="relative overflow-hidden bg-slate-900/40 border border-slate-800/80 rounded-3xl p-5 sm:p-6 backdrop-blur-md mb-6"
+      >
+        <div class="absolute -right-10 -top-10 w-36 h-36 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none" />
+        <div class="absolute -left-16 -bottom-16 w-40 h-40 bg-emerald-500/5 rounded-full blur-2xl pointer-events-none" />
+
+        <div class="relative z-10 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+          <div class="min-w-0">
+            <h2 class="text-xl sm:text-2xl font-extrabold text-white">World Cup Predictions</h2>
+            <p class="text-slate-400 text-sm mt-1.5 max-w-xl">
+              View fixtures and answer match questions. See
+              <NuxtLink to="/rules" class="text-emerald-400 hover:text-emerald-300">rules</NuxtLink>
+              for scoring.
+            </p>
+            <p class="flex items-center gap-1.5 text-xs text-slate-500 mt-3">
+              <UIcon name="i-heroicons-clock" class="w-3.5 h-3.5 text-emerald-500/80 shrink-0" />
+              Predictions lock at kick-off (IST)
+            </p>
+          </div>
+
+          <UserTotalPointsStat
+            :points="userTotalPoints"
+            :pending="fixturesPending"
+            class="shrink-0"
+          />
         </div>
       </div>
 
@@ -73,11 +84,10 @@
 import type { DashboardFixture } from '~/types/DashboardFixture'
 import type { FixtureListItem } from '~/types/fixtures'
 import type { Prediction } from '~/types/predictions'
-import { apiRoutes } from '~/utils/api'
+import { useFixturesData } from '~/composables/useFixturesData'
 import {
   findFirstScheduledFixture,
   fixtureCardElementId,
-  normalizeFixturesResponse,
   scrollToFixtureCard,
 } from '~/utils/dashboard'
 
@@ -86,33 +96,15 @@ definePageMeta({
 })
 
 const user = useSupabaseUser()
-const requestFetch = useRequestFetch()
 const dashboardStore = useDashboardStore()
 
 const {
-  data: fixturesResponse,
   pending: fixturesPending,
   error: fixturesError,
-} = await useFetch(apiRoutes.fixtures, {
-  key: 'dashboard-fixtures',
-  $fetch: requestFetch as typeof $fetch,
-  transform: (data) =>
-    normalizeFixturesResponse(
-      (data ?? []) as Parameters<typeof normalizeFixturesResponse>[0],
-    ),
-})
-
-watch(
-  fixturesResponse,
-  (items) => {
-    if (items) {
-      dashboardStore.setItems(items)
-    }
-  },
-  { immediate: true },
-)
+} = await useFixturesData()
 
 const dashboardItems = computed((): DashboardFixture[] => dashboardStore.items.value)
+const userTotalPoints = computed(() => dashboardStore.userTotalPoints.value)
 
 const isPredictionsOpen = ref(false)
 const selectedFixture = ref<FixtureListItem | null>(null)
