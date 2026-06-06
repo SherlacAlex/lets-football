@@ -20,14 +20,14 @@
         </span>
         <span
           v-if="fixture.venue"
-          class="px-2 py-0.5 rounded-full bg-slate-950 border border-slate-800 text-slate-400"
+          class="hidden sm:inline-flex px-2 py-0.5 rounded-full bg-slate-950 border border-slate-800 text-slate-400 max-w-[8rem] truncate"
         >
           {{ fixture.venue }}
         </span>
       </div>
     </div>
 
-    <div class="flex items-center justify-between gap-4 py-2">
+    <div class="flex items-center justify-between gap-2 sm:gap-4 py-2">
       <FixtureTeamDisplay :team="fixture.home_team" align="home" />
 
       <FixtureScoreDisplay
@@ -61,7 +61,7 @@
 
       <button
         type="button"
-        class="relative shrink-0 overflow-hidden px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 text-xs font-bold rounded-xl active:scale-95 transition-all duration-200"
+        class="relative shrink-0 overflow-hidden px-3 sm:px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 text-[11px] sm:text-xs font-bold rounded-xl active:scale-95 transition-all duration-200"
         :class="{ 'ml-auto': !showPointsEarned }"
         @click="emit('open-predictions')"
       >

@@ -10,9 +10,9 @@
       <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm" @click="close" />
 
       <div
-        class="relative w-full max-w-lg max-h-[90vh] flex flex-col bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl"
+        class="relative w-full max-w-lg max-h-[90dvh] flex flex-col bg-slate-900 border border-slate-800 rounded-2xl sm:rounded-3xl shadow-2xl"
       >
-        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-800 shrink-0">
+        <div class="flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4 border-b border-slate-800 shrink-0">
           <h2 :id="titleId" class="text-lg font-extrabold text-white">
             Manage Results
           </h2>
@@ -26,7 +26,7 @@
           </button>
         </div>
 
-        <div class="flex-1 overflow-y-auto p-6 space-y-6">
+        <div class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
           <div
             v-if="formMessage"
             :class="[
@@ -64,7 +64,7 @@
                 type="number"
                 min="0"
                 placeholder="0"
-                class="w-14 h-14 bg-slate-950 border border-slate-800 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-xl text-center font-bold text-lg text-white focus:outline-none"
+                class="w-12 h-12 sm:w-14 sm:h-14 bg-slate-950 border border-slate-800 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-xl text-center font-bold text-base sm:text-lg text-white focus:outline-none"
               />
               <span class="text-slate-600 font-bold">-</span>
               <input
@@ -72,7 +72,7 @@
                 type="number"
                 min="0"
                 placeholder="0"
-                class="w-14 h-14 bg-slate-950 border border-slate-800 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-xl text-center font-bold text-lg text-white focus:outline-none"
+                class="w-12 h-12 sm:w-14 sm:h-14 bg-slate-950 border border-slate-800 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-xl text-center font-bold text-base sm:text-lg text-white focus:outline-none"
               />
             </div>
           </div>
@@ -116,7 +116,7 @@
           </ol>
         </div>
 
-        <div class="shrink-0 flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-800 bg-slate-900/95">
+        <div class="shrink-0 flex items-center justify-end gap-2 sm:gap-3 px-4 py-3 sm:px-6 sm:py-4 border-t border-slate-800 bg-slate-900/95">
           <button
             type="button"
             class="px-5 py-2.5 rounded-xl border border-slate-700 text-sm font-semibold text-slate-300 hover:bg-slate-800 transition-colors"

@@ -19,18 +19,18 @@
     </div>
 
     <!-- Per-match overview -->
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-      <div class="bg-slate-900/40 border border-slate-800/80 rounded-2xl p-5 text-center">
-        <p class="text-3xl font-extrabold text-emerald-400">4</p>
-        <p class="text-xs text-slate-500 mt-1 uppercase tracking-wider font-semibold">Questions per match</p>
+    <div class="grid grid-cols-3 gap-2 sm:gap-4">
+      <div class="bg-slate-900/40 border border-slate-800/80 rounded-xl sm:rounded-2xl p-3 sm:p-5 text-center">
+        <p class="text-2xl sm:text-3xl font-extrabold text-emerald-400">4</p>
+        <p class="text-[10px] sm:text-xs text-slate-500 mt-1 uppercase tracking-wide font-semibold leading-snug">Questions per match</p>
       </div>
-      <div class="bg-slate-900/40 border border-emerald-500/20 rounded-2xl p-5 text-center">
-        <p class="text-3xl font-extrabold text-emerald-400">5</p>
-        <p class="text-xs text-slate-500 mt-1 uppercase tracking-wider font-semibold">Points — exact score</p>
+      <div class="bg-slate-900/40 border border-emerald-500/20 rounded-xl sm:rounded-2xl p-3 sm:p-5 text-center">
+        <p class="text-2xl sm:text-3xl font-extrabold text-emerald-400">5</p>
+        <p class="text-[10px] sm:text-xs text-slate-500 mt-1 uppercase tracking-wide font-semibold leading-snug">Points — exact score</p>
       </div>
-      <div class="bg-slate-900/40 border border-indigo-500/20 rounded-2xl p-5 text-center">
-        <p class="text-3xl font-extrabold text-indigo-400">1</p>
-        <p class="text-xs text-slate-500 mt-1 uppercase tracking-wider font-semibold">Point each — bonus questions</p>
+      <div class="bg-slate-900/40 border border-indigo-500/20 rounded-xl sm:rounded-2xl p-3 sm:p-5 text-center">
+        <p class="text-2xl sm:text-3xl font-extrabold text-indigo-400">1</p>
+        <p class="text-[10px] sm:text-xs text-slate-500 mt-1 uppercase tracking-wide font-semibold leading-snug">Point each — bonus</p>
       </div>
     </div>
 

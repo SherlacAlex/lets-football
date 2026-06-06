@@ -72,6 +72,6 @@ export type MemberFixturePredictionDetail = {
     home_score: number
     away_score: number
   } | null
-  home_team: { id: string; name: string }
-  away_team: { id: string; name: string }
+  home_team: { id: string; name: string; fifa_code: string; flag_url: string | null }
+  away_team: { id: string; name: string; fifa_code: string; flag_url: string | null }
 }

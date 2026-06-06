@@ -1,18 +1,18 @@
 <template>
   <div class="space-y-8">
     <div>
-      <div class="flex justify-between items-center mb-6">
-        <div>
-          <h2 class="text-xl font-extrabold text-white">World Cup Results</h2>
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between mb-4 sm:mb-6">
+        <div class="min-w-0">
+          <h2 class="text-lg sm:text-xl font-extrabold text-white">World Cup Results</h2>
           <p class="text-slate-400 text-xs mt-1">
             Enter match results and correct answers for bonus questions.
           </p>
         </div>
         <div
-          class="flex items-center space-x-2 bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-400"
+          class="flex items-center gap-2 bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-400 shrink-0 self-start"
         >
-          <UIcon name="i-heroicons-shield-check" class="w-4 h-4 text-emerald-400" />
-          <span>Admin — results trigger point recalculation</span>
+          <UIcon name="i-heroicons-shield-check" class="w-4 h-4 text-emerald-400 shrink-0" />
+          <span class="leading-snug">Admin — results trigger point recalculation</span>
         </div>
       </div>
 

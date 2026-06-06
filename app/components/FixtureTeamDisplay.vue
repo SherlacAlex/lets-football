@@ -6,7 +6,7 @@
         : 'flex-1 flex flex-col items-center sm:flex-row-reverse sm:items-center sm:space-x-reverse sm:space-x-3 text-center sm:text-right min-w-0',
     ]"
   >
-    <div class="w-12 h-12 sm:w-14 sm:h-14 shrink-0 flex items-center justify-center">
+    <div class="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 shrink-0 flex items-center justify-center">
       <img
         v-if="team.flag_url"
         :src="team.flag_url"
@@ -20,7 +20,7 @@
         {{ team.fifa_code }}
       </span>
     </div>
-    <span class="font-bold text-slate-200 mt-2 sm:mt-0 text-sm sm:text-base truncate">
+    <span class="font-bold text-slate-200 mt-1.5 sm:mt-0 text-xs sm:text-sm md:text-base truncate max-w-[5.5rem] sm:max-w-none">
       {{ team.name }}
     </span>
   </div>

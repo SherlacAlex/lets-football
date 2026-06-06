@@ -10,9 +10,9 @@
       <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm" @click="close" />
 
       <div
-        class="relative w-full max-w-lg max-h-[90vh] flex flex-col bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl"
+        class="relative w-full max-w-lg max-h-[90dvh] flex flex-col bg-slate-900 border border-slate-800 rounded-2xl sm:rounded-3xl shadow-2xl"
       >
-        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-800 shrink-0">
+        <div class="flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4 border-b border-slate-800 shrink-0">
           <h2 :id="titleId" class="text-lg font-extrabold text-white">
             Predictions
           </h2>
@@ -26,7 +26,7 @@
           </button>
         </div>
 
-        <div class="flex-1 overflow-y-auto p-6 space-y-6">
+        <div class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
           <div
             v-if="formMessage"
             :class="[
@@ -39,66 +39,92 @@
             {{ formMessage }}
           </div>
 
-          <div class="bg-slate-950/50 border border-slate-800 rounded-2xl p-4">
-            <p class="text-xs text-slate-500 mb-3">
-              {{ formatMatchDate(fixture.match_date) }}
-              <template v-if="fixture.group_name"> &bull; {{ fixture.group_name }}</template>
-            </p>
-            <div class="flex items-center justify-between gap-4">
-              <FixtureTeamDisplay :team="fixture.home_team" align="home" />
-              <FixtureScoreDisplay
-                :home-score="fixture.home_score"
-                :away-score="fixture.away_score"
-              />
-              <FixtureTeamDisplay :team="fixture.away_team" align="away" />
-            </div>
-            <p class="text-xs text-slate-500 mt-3 text-center">Actual match score</p>
-          </div>
-
-          <template v-if="canEditPredictions">
-            <div :class="scorePredictionClass">
-              <div class="flex items-center justify-between gap-2">
-                <p class="text-sm font-semibold text-slate-200">Your score prediction</p>
-                <span class="text-xs font-bold text-emerald-400">5 pts</span>
+          <div :class="matchResultCardClass">
+            <div class="flex items-center justify-between gap-2">
+              <div class="min-w-0">
+                <p class="text-xs text-slate-500 uppercase tracking-wider font-semibold">
+                  Match result
+                </p>
+                <p class="text-xs text-slate-500 mt-1">
+                  {{ formatMatchDate(fixture.match_date) }}
+                  <template v-if="fixture.group_name"> &bull; {{ fixture.group_name }}</template>
+                </p>
               </div>
-              <div class="flex items-center justify-center gap-3">
-                <input
-                  v-model.number="predictedHomeScore"
-                  type="number"
-                  min="0"
-                  placeholder="0"
-                  class="w-14 h-14 bg-slate-950 border border-slate-800 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-xl text-center font-bold text-lg text-white focus:outline-none"
-                />
-                <span class="text-slate-600 font-bold">-</span>
-                <input
-                  v-model.number="predictedAwayScore"
-                  type="number"
-                  min="0"
-                  placeholder="0"
-                  class="w-14 h-14 bg-slate-950 border border-slate-800 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-xl text-center font-bold text-lg text-white focus:outline-none"
-                />
-              </div>
-            </div>
-          </template>
-
-          <div
-            v-else-if="existingPrediction"
-            :class="viewScoreClass"
-          >
-            <div class="flex items-center justify-between gap-2 mb-2">
-              <p class="text-xs text-slate-500">Your prediction</p>
               <span
-                v-if="scorePointsEarned != null"
-                class="text-xs font-bold"
+                v-if="canEditPredictions"
+                class="text-xs font-bold text-emerald-400 shrink-0"
+              >
+                Up to 5 pts
+              </span>
+              <span
+                v-else-if="existingPrediction && scorePointsEarned != null"
+                class="text-xs font-bold shrink-0"
                 :class="isScoreCorrect ? 'text-emerald-400' : 'text-slate-500'"
               >
                 {{ scorePointsEarned }} {{ scorePointsEarned === 1 ? 'pt' : 'pts' }}
               </span>
             </div>
-            <p class="text-2xl font-bold text-white tabular-nums text-center">
-              {{ existingPrediction.home_score }} – {{ existingPrediction.away_score }}
-            </p>
-            <p class="text-xs text-slate-500 mt-2 text-center">Predictions are locked for this match.</p>
+
+            <div class="flex items-center justify-between gap-2 sm:gap-4">
+              <FixtureTeamDisplay :team="fixture.home_team" align="home" />
+
+              <div class="flex flex-col items-center gap-2 shrink-0 min-w-[5.5rem]">
+                <div v-if="hasFinalScore" class="text-center">
+                  <p class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1">
+                    Final
+                  </p>
+                  <p class="text-xl sm:text-2xl font-bold text-white tabular-nums leading-none">
+                    {{ fixture.home_score }} – {{ fixture.away_score }}
+                  </p>
+                </div>
+
+                <div
+                  v-if="canEditPredictions"
+                  class="w-full text-center rounded-xl px-3 py-2 border"
+                  :class="predictionInputClass"
+                >
+                  <p class="text-[10px] uppercase tracking-wider font-semibold mb-2 text-slate-400">
+                    Predicted
+                  </p>
+                  <div class="flex items-center justify-center gap-2">
+                    <input
+                      v-model.number="predictedHomeScore"
+                      type="number"
+                      min="0"
+                      placeholder="0"
+                      class="w-11 h-11 sm:w-12 sm:h-12 bg-slate-950 border border-slate-800 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-xl text-center font-bold text-base text-white focus:outline-none"
+                    />
+                    <span class="text-slate-600 font-bold">-</span>
+                    <input
+                      v-model.number="predictedAwayScore"
+                      type="number"
+                      min="0"
+                      placeholder="0"
+                      class="w-11 h-11 sm:w-12 sm:h-12 bg-slate-950 border border-slate-800 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-xl text-center font-bold text-base text-white focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div
+                  v-else-if="existingPrediction"
+                  class="w-full text-center rounded-xl px-3 py-2 border"
+                  :class="predictionScoreClass"
+                >
+                  <p class="text-[10px] uppercase tracking-wider font-semibold mb-1">
+                    Predicted
+                  </p>
+                  <p class="text-lg sm:text-xl font-bold tabular-nums leading-none">
+                    {{ existingPrediction.home_score }} – {{ existingPrediction.away_score }}
+                  </p>
+                </div>
+
+                <p v-else class="text-xs text-slate-500 text-center">
+                  Not predicted
+                </p>
+              </div>
+
+              <FixtureTeamDisplay :team="fixture.away_team" align="away" />
+            </div>
           </div>
 
           <div v-if="!questions.length" class="text-center py-6 text-slate-400 text-sm">
@@ -148,7 +174,7 @@
           </ol>
         </div>
 
-        <div class="shrink-0 flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-800 bg-slate-900/95">
+        <div class="shrink-0 flex items-center justify-end gap-2 sm:gap-3 px-4 py-3 sm:px-6 sm:py-4 border-t border-slate-800 bg-slate-900/95">
           <button
             type="button"
             class="px-5 py-2.5 rounded-xl border border-slate-700 text-sm font-semibold text-slate-300 hover:bg-slate-800 transition-colors"
@@ -230,12 +256,14 @@ const scoreHasError = computed(
     isScoreMissing(predictedHomeScore.value, predictedAwayScore.value),
 )
 
-const scorePredictionClass = computed(() => [
-  'bg-slate-950/50 border rounded-2xl p-4 space-y-3',
-  scoreHasError.value ? 'border-rose-500' : 'border-slate-800',
-])
-
 const canEditPredictions = computed(() => props.fixture?.can_predict ?? false)
+
+const hasFinalScore = computed(
+  () =>
+    props.fixture?.status === 'completed' &&
+    props.fixture.home_score != null &&
+    props.fixture.away_score != null,
+)
 
 const scorePointsEarned = computed(
   () => props.existingPrediction?.points_earned ?? null,
@@ -245,12 +273,27 @@ const isScoreCorrect = computed(
   () => scorePointsEarned.value != null && scorePointsEarned.value > 0,
 )
 
-const viewScoreClass = computed(() => [
-  'rounded-2xl p-4',
+const matchResultCardClass = computed(() => {
+  const base = 'rounded-2xl p-4 space-y-3 border'
+  if (canEditPredictions.value) {
+    return `${base} bg-slate-950/50 ${scoreHasError.value ? 'border-rose-500' : 'border-slate-800'}`
+  }
+  return isScoreCorrect.value
+    ? `${base} bg-emerald-500/5 border-emerald-500/40`
+    : `${base} bg-slate-950/50 border-slate-800`
+})
+
+const predictionScoreClass = computed(() =>
   isScoreCorrect.value
-    ? 'bg-emerald-500/5 border border-emerald-500/40'
-    : 'bg-slate-950/50 border border-slate-800',
-])
+    ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400'
+    : 'bg-slate-950/80 border-slate-800 text-slate-300',
+)
+
+const predictionInputClass = computed(() =>
+  scoreHasError.value
+    ? 'bg-slate-950/80 border-rose-500'
+    : 'bg-slate-950/80 border-slate-800',
+)
 
 function getQuestionPointsEarned(question: FixtureQuestion): number | null {
   const saved = savedUserAnswers.value.find(

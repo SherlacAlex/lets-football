@@ -16,7 +16,7 @@
       </div>
     </div>
 
-    <div class="max-w-7xl mx-auto px-6 relative z-10 w-full">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 w-full">
       <!-- Hero Section -->
       <div class="text-center max-w-3xl mx-auto space-y-8">
         <!-- Badge -->
@@ -27,7 +27,7 @@
         </div>
 
         <!-- Main Title -->
-        <h1 class="text-5xl sm:text-7xl font-extrabold tracking-tight leading-none">
+        <h1 class="text-4xl sm:text-5xl md:text-7xl font-extrabold tracking-tight leading-tight sm:leading-none">
           Predict the Matches.
           <span
             class="bg-gradient-to-r from-emerald-400 via-teal-300 to-indigo-500 bg-clip-text text-transparent block mt-2">

@@ -13,8 +13,8 @@ export default defineEventHandler(async (event) => {
         .from('fixtures')
         .select(`
       status,
-      home_team:teams!fixtures_home_team_id_fkey (id, name),
-      away_team:teams!fixtures_away_team_id_fkey (id, name)
+      home_team:teams!fixtures_home_team_id_fkey (id, name, fifa_code, flag_url),
+      away_team:teams!fixtures_away_team_id_fkey (id, name, fifa_code, flag_url)
     `)
         .eq('id', fixtureId)
         .single()

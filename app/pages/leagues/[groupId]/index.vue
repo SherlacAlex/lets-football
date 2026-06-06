@@ -49,10 +49,10 @@
           <table class="w-full text-sm text-left">
             <thead>
               <tr class="border-b border-slate-800 text-xs uppercase tracking-wider text-slate-500">
-                <th class="px-6 py-4 font-semibold w-16">#</th>
-                <th class="px-6 py-4 font-semibold">Player</th>
-                <th class="px-6 py-4 font-semibold text-right">Points</th>
-                <th class="px-6 py-4 font-semibold text-right w-32">Predictions</th>
+                <th class="px-3 sm:px-6 py-3 sm:py-4 font-semibold w-12 sm:w-16">#</th>
+                <th class="px-3 sm:px-6 py-3 sm:py-4 font-semibold">Player</th>
+                <th class="px-3 sm:px-6 py-3 sm:py-4 font-semibold text-right">Pts</th>
+                <th class="px-3 sm:px-6 py-3 sm:py-4 font-semibold text-right w-24 sm:w-32">View</th>
               </tr>
             </thead>
             <tbody>
@@ -67,10 +67,10 @@
                   ? 'bg-emerald-500/5 hover:bg-emerald-500/10'
                   : 'hover:bg-slate-800/20',
               ]">
-                <td class="px-6 py-4 font-bold text-slate-400 tabular-nums">
+                <td class="px-3 sm:px-6 py-3 sm:py-4 font-bold text-slate-400 tabular-nums">
                   {{ member.rank }}
                 </td>
-                <td class="px-6 py-4">
+                <td class="px-3 sm:px-6 py-3 sm:py-4 min-w-0">
                   <span :class="[
                     'font-semibold',
                     isCurrentUser(member.id) ? 'text-emerald-400' : 'text-white',
@@ -81,10 +81,10 @@
                     </span>
                   </span>
                 </td>
-                <td class="px-6 py-4 text-right font-bold text-indigo-400 tabular-nums">
+                <td class="px-3 sm:px-6 py-3 sm:py-4 text-right font-bold text-indigo-400 tabular-nums">
                   {{ member.total_points }}
                 </td>
-                <td class="px-6 py-4 text-right">
+                <td class="px-3 sm:px-6 py-3 sm:py-4 text-right">
                   <NuxtLink :to="memberPredictionsPath(member.user_id)"
                     class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 border border-emerald-500/20 transition-colors"
                     @click.stop>

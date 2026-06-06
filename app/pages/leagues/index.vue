@@ -65,10 +65,10 @@
         <table class="w-full text-sm text-left">
           <thead>
             <tr class="border-b border-slate-800 text-xs uppercase tracking-wider text-slate-500">
-              <th class="px-6 py-4 font-semibold">League</th>
-              <th class="px-6 py-4 font-semibold">My rank</th>
-              <th class="px-6 py-4 font-semibold">Points</th>
-              <th class="px-6 py-4 font-semibold text-right">Actions</th>
+              <th class="px-3 sm:px-6 py-3 sm:py-4 font-semibold">League</th>
+              <th class="px-3 sm:px-6 py-3 sm:py-4 font-semibold">My rank</th>
+              <th class="px-3 sm:px-6 py-3 sm:py-4 font-semibold">Points</th>
+              <th class="px-3 sm:px-6 py-3 sm:py-4 font-semibold text-right">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -77,23 +77,23 @@
               :key="league.id"
               class="border-b border-slate-800/80 last:border-0 hover:bg-slate-800/20 transition-colors"
             >
-              <td class="px-6 py-4">
+              <td class="px-3 sm:px-6 py-3 sm:py-4">
                 <p class="font-semibold text-white">{{ league.name }}</p>
                 <p class="text-xs text-slate-500 mt-0.5">
                   {{ league.member_count }} {{ league.member_count === 1 ? 'member' : 'members' }}
                 </p>
               </td>
-              <td class="px-6 py-4">
+              <td class="px-3 sm:px-6 py-3 sm:py-4">
                 <span
                   class="inline-flex px-2.5 py-1 rounded-full text-xs font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 tabular-nums"
                 >
                   {{ league.my_rank ? `#${league.my_rank}` : '—' }}
                 </span>
               </td>
-              <td class="px-6 py-4 font-semibold text-emerald-400 tabular-nums">
+              <td class="px-3 sm:px-6 py-3 sm:py-4 font-semibold text-emerald-400 tabular-nums">
                 {{ league.my_total_points }}
               </td>
-              <td class="px-6 py-4 text-right">
+              <td class="px-3 sm:px-6 py-3 sm:py-4 text-right">
                 <NuxtLink
                   :to="`/leagues/${league.id}`"
                   class="inline-flex items-center gap-1.5 px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white text-xs font-semibold rounded-xl transition-colors"
