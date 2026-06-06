@@ -59,7 +59,7 @@
             <div :class="scorePredictionClass">
               <div class="flex items-center justify-between gap-2">
                 <p class="text-sm font-semibold text-slate-200">Your score prediction</p>
-                <span class="text-xs font-bold text-emerald-400">2 pts</span>
+                <span class="text-xs font-bold text-emerald-400">5 pts</span>
               </div>
               <div class="flex items-center justify-center gap-3">
                 <input

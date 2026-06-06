@@ -79,7 +79,7 @@ import {
 
 definePageMeta({
   middleware: 'admin',
-  layout: 'admin',
+  layout: 'auth',
 })
 
 const requestFetch = useRequestFetch()

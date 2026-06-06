@@ -1,3 +1,5 @@
+import type { FixtureStatus } from './fixtures'
+
 export type LeagueData = {
   id: string
   name: string
@@ -40,9 +42,15 @@ export type JoinGroupResponse = {
 export type MemberFixturePoints = {
   fixture_id: string
   match_date: string
-  home_team: { name: string; fifa_code: string }
-  away_team: { name: string; fifa_code: string }
+  status: FixtureStatus
+  home_score: number | null
+  away_score: number | null
+  group_name: string | null
+  venue: string | null
+  home_team: { name: string; fifa_code: string; flag_url?: string | null }
+  away_team: { name: string; fifa_code: string; flag_url?: string | null }
   total_points: number
+  has_predicted: boolean
 }
 
 export type MemberFixturePredictionDetail = {

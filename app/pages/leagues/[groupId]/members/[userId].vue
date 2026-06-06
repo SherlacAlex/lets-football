@@ -20,19 +20,19 @@
 
     <div
       v-if="predictionsPending"
-      class="bg-slate-900/40 border border-slate-800/80 rounded-3xl p-8 animate-pulse"
+      class="grid grid-cols-1 lg:grid-cols-2 gap-6"
     >
-      <div class="h-8 bg-slate-800 rounded w-1/3 mb-4" />
-      <div class="space-y-3">
-        <div v-for="n in 5" :key="n" class="h-12 bg-slate-800/60 rounded-xl" />
-      </div>
+      <AppCard v-for="n in 4" :key="n" class="animate-pulse !hover:border-slate-800">
+        <div class="h-4 bg-slate-800 rounded w-1/3 mb-6" />
+        <div class="h-16 bg-slate-800/60 rounded-2xl" />
+      </AppCard>
     </div>
 
     <template v-else>
       <div class="relative overflow-hidden bg-slate-900/40 border border-slate-800/80 rounded-3xl p-6 sm:p-8 backdrop-blur-md">
-        <h1 class="text-2xl font-extrabold text-white">Completed match points</h1>
+        <h1 class="text-2xl font-extrabold text-white">Match predictions</h1>
         <p class="text-slate-400 text-sm mt-2">
-          Tap a match to view the full prediction and result.
+          All fixtures for this member. Tap a completed match to view their full prediction.
         </p>
       </div>
 
@@ -40,27 +40,83 @@
         v-if="!fixturePoints.length"
         class="text-center py-16 bg-slate-900/40 border border-slate-800/80 rounded-3xl"
       >
-        <p class="text-slate-400 text-sm">No completed fixture points yet.</p>
+        <p class="text-slate-400 text-sm">No fixtures scheduled yet.</p>
       </div>
 
-      <div v-else class="space-y-3">
-        <button
+      <div v-else class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <component
+          :is="canViewFixture(fixture) ? 'button' : 'div'"
           v-for="fixture in fixturePoints"
           :key="fixture.fixture_id"
-          type="button"
-          class="w-full text-left bg-slate-900/40 border border-slate-800/80 hover:border-slate-700 rounded-2xl p-4 transition-colors"
-          @click="openFixture(fixture.fixture_id)"
+          :type="canViewFixture(fixture) ? 'button' : undefined"
+          class="w-full text-left"
+          :class="canViewFixture(fixture) ? 'cursor-pointer' : 'cursor-default'"
+          @click="canViewFixture(fixture) ? openFixture(fixture.fixture_id) : undefined"
         >
-          <p class="text-xs text-slate-500 mb-2">{{ formatMatchDate(fixture.match_date) }}</p>
-          <div class="flex items-center justify-between gap-4">
-            <span class="font-semibold text-white">
-              {{ fixture.home_team.fifa_code }} vs {{ fixture.away_team.fifa_code }}
-            </span>
-            <span class="text-sm font-bold text-emerald-400 tabular-nums">
-              {{ fixture.total_points }} pts
-            </span>
-          </div>
-        </button>
+          <AppCard :class="canViewFixture(fixture) ? '!hover:border-slate-700' : '!hover:border-slate-800'">
+            <div class="flex justify-between items-center text-xs text-slate-500 mb-4 gap-2 flex-wrap">
+              <span>
+                {{ formatMatchDate(fixture.match_date) }}
+                <template v-if="fixture.group_name"> &bull; {{ fixture.group_name }}</template>
+              </span>
+              <div class="flex items-center gap-2">
+                <span
+                  v-if="fixture.status === 'completed' && fixture.has_predicted"
+                  class="px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-500/10 text-indigo-400 border border-indigo-500/30"
+                >
+                  Predicted
+                </span>
+                <span
+                  v-else-if="fixture.status === 'completed'"
+                  class="px-2 py-0.5 rounded-full text-xs font-medium bg-rose-500/10 text-rose-400 border border-rose-500/30"
+                >
+                  Not predicted
+                </span>
+                <span
+                  class="px-2 py-0.5 rounded-full border text-xs font-medium capitalize"
+                  :class="statusBadgeClass(fixture.status)"
+                >
+                  {{ statusLabel(fixture.status) }}
+                </span>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between gap-4 py-2">
+              <FixtureTeamDisplay :team="toTeam(fixture.home_team)" align="home" />
+              <FixtureScoreDisplay
+                :home-score="fixture.home_score"
+                :away-score="fixture.away_score"
+              />
+              <FixtureTeamDisplay :team="toTeam(fixture.away_team)" align="away" />
+            </div>
+
+            <div class="mt-6 flex items-end justify-between gap-3">
+              <div class="text-left min-w-0">
+                <p class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">
+                  Points earned
+                </p>
+                <p
+                  v-if="fixture.status === 'completed'"
+                  class="text-lg font-bold tabular-nums leading-tight"
+                  :class="fixture.total_points > 0 ? 'text-emerald-400' : 'text-rose-400'"
+                >
+                  {{ fixture.total_points }}
+                  <span class="text-xs font-semibold">
+                    {{ fixture.total_points === 1 ? 'pt' : 'pts' }}
+                  </span>
+                </p>
+                <p v-else class="text-sm text-slate-500">—</p>
+              </div>
+
+              <span
+                v-if="canViewFixture(fixture)"
+                class="shrink-0 text-xs font-bold text-emerald-400"
+              >
+                View prediction
+              </span>
+            </div>
+          </AppCard>
+        </component>
       </div>
     </template>
 
@@ -75,8 +131,9 @@
 
 <script setup lang="ts">
 import type { MemberFixturePoints } from '~/types/groups'
+import type { Team } from '~/types/fixtures'
 import { apiRoutes } from '~/utils/api'
-import { formatMatchDate } from '~/utils/fixtures'
+import { formatMatchDate, statusBadgeClass, statusLabel } from '~/utils/fixtures'
 
 definePageMeta({
   layout: 'auth',
@@ -96,7 +153,7 @@ const {
   data: predictionsResponse,
   pending: predictionsPending,
   error: predictionsError,
-} = await useFetch(
+} = await useFetch<MemberFixturePoints[]>(
   () => apiRoutes.memberPredictions(groupId.value, userId.value),
   {
     key: () => `member-predictions-${groupId.value}-${userId.value}`,
@@ -108,6 +165,20 @@ const {
 const fixturePoints = computed(
   (): MemberFixturePoints[] => predictionsResponse.value ?? [],
 )
+
+function toTeam(team: MemberFixturePoints['home_team']): Team {
+  return {
+    id: team.fifa_code,
+    name: team.name,
+    short_name: team.name,
+    fifa_code: team.fifa_code,
+    flag_url: team.flag_url ?? null,
+  }
+}
+
+function canViewFixture(fixture: MemberFixturePoints) {
+  return fixture.has_predicted && fixture.status === 'completed'
+}
 
 function openFixture(fixtureId: string) {
   selectedFixtureId.value = fixtureId

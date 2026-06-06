@@ -20,13 +20,6 @@
 
         <!-- Navigation Links -->
         <div class="p-4 space-y-2">
-          <NuxtLink to="/welcome"
-            class="flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 hover:bg-slate-800 hover:text-emerald-400 text-slate-400"
-            active-class="bg-emerald-500/10 text-emerald-400 font-semibold border-l-4 border-emerald-500">
-            <UIcon name="i-heroicons-home" class="w-6 h-6" />
-            <span class="hidden md:inline text-sm">Landing Page</span>
-          </NuxtLink>
-
           <NuxtLink to="/dashboard"
             class="flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 hover:bg-slate-800 hover:text-emerald-400 text-slate-400"
             active-class="bg-emerald-500/10 text-emerald-400 font-semibold border-l-4 border-emerald-500">
@@ -53,6 +46,13 @@
             active-class="bg-emerald-500/10 text-emerald-400 font-semibold border-l-4 border-emerald-500">
             <UIcon name="i-heroicons-shield-check" class="w-6 h-6" />
             <span class="hidden md:inline text-sm">Rules</span>
+          </NuxtLink>
+
+          <NuxtLink v-if="isAdmin" to="/masterboard"
+            class="flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 hover:bg-slate-800 hover:text-emerald-400 text-slate-400"
+            active-class="bg-emerald-500/10 text-emerald-400 font-semibold border-l-4 border-emerald-500">
+            <UIcon name="i-heroicons-clipboard-document-check" class="w-6 h-6" />
+            <span class="hidden md:inline text-sm">Results</span>
           </NuxtLink>
         </div>
       </div>
@@ -95,6 +95,11 @@
               active-class="!text-emerald-400 bg-emerald-500/10">
               Profile
             </NuxtLink>
+            <NuxtLink v-if="isAdmin" to="/masterboard"
+              class="px-4 py-2 text-sm font-medium rounded-lg text-slate-400 hover:text-white transition-colors"
+              active-class="!text-emerald-400 bg-emerald-500/10">
+              Results
+            </NuxtLink>
           </nav>
           <div class="hidden sm:flex items-center space-x-3">
             <span class="text-sm font-semibold tracking-wider text-emerald-400 uppercase">World Cup Predictions</span>
@@ -119,6 +124,9 @@
 <script setup lang="ts">
 const user = useSupabaseUser()
 const client = useSupabaseClient()
+const { isAdmin, fetchAdminStatus } = useAdmin()
+
+watch(user, () => fetchAdminStatus(), { immediate: true })
 
 const signOut = async () => {
   await client.auth.signOut()

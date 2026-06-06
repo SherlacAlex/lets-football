@@ -8,7 +8,6 @@ export default defineEventHandler(async (event) => {
     const groupId = getRouterParam(event, 'id')
     const targetUserId = getRouterParam(event, 'userId')
 
-    // Check requester is a member of the group
     const { data: membership } = await supabase
         .from('group_members')
         .select('user_id')
@@ -16,38 +15,95 @@ export default defineEventHandler(async (event) => {
         .eq('user_id', user.sub)
         .single()
 
-    if (!membership) throw createError({ statusCode: 403, message: 'Not a member of this group' })
+    if (!membership) {
+        throw createError({ statusCode: 403, message: 'Not a member of this group' })
+    }
 
-    // Get completed fixtures with points earned by target user
-    const { data: fixturesWithPoints, error } = await supabase
+    const { data: fixtures, error: fixturesError } = await supabase
         .from('fixtures')
         .select(`
       id,
       match_date,
-      home_team:teams!fixtures_home_team_id_fkey (name, fifa_code),
-      away_team:teams!fixtures_away_team_id_fkey (name, fifa_code),
-      score_prediction!inner(points_earned),
-      prediction_answer!inner(points_earned)
+      status,
+      home_score,
+      away_score,
+      group_name,
+      venue,
+      home_team:teams!fixtures_home_team_id_fkey (name, fifa_code, flag_url),
+      away_team:teams!fixtures_away_team_id_fkey (name, fifa_code, flag_url)
     `)
-        .eq('status', 'completed')
-        .eq('score_prediction.user_id', targetUserId)
-        .eq('prediction_answer.user_id', targetUserId)
         .order('match_date', { ascending: true })
 
-    if (error) throw createError({ statusCode: 500, message: error.message })
+    if (fixturesError) {
+        throw createError({ statusCode: 500, message: fixturesError.message })
+    }
 
-    const result = fixturesWithPoints.map(f => {
-        // Sum points from score_prediction (single) and prediction_answer (multiple)
-        const scorePoints = f.score_prediction?.points_earned || 0
-        const answerPoints = f.prediction_answer?.reduce((sum, a) => sum + (a.points_earned || 0), 0) || 0
-        return {
-            fixture_id: f.id,
-            match_date: f.match_date,
-            home_team: f.home_team,
-            away_team: f.away_team,
-            total_points: scorePoints + answerPoints
-        }
+    if (!fixtures?.length) {
+        return []
+    }
+
+    const fixtureIds = fixtures.map((fixture) => fixture.id)
+
+    const { data: scorePredictions, error: scoreError } = await supabase
+        .from('score_prediction')
+        .select('fixture_id, points_earned')
+        .eq('user_id', targetUserId)
+        .in('fixture_id', fixtureIds)
+
+    if (scoreError) {
+        throw createError({ statusCode: 500, message: scoreError.message })
+    }
+
+    const { data: predictionAnswers, error: answersError } = await supabase
+        .from('prediction_answer')
+        .select('fixture_id, points_earned')
+        .eq('user_id', targetUserId)
+        .in('fixture_id', fixtureIds)
+
+    if (answersError) {
+        throw createError({ statusCode: 500, message: answersError.message })
+    }
+
+    const scorePointsByFixture = new Map<string, number>()
+    const hasPredictedByFixture = new Set<string>()
+    scorePredictions?.forEach((prediction) => {
+        hasPredictedByFixture.add(prediction.fixture_id)
+        scorePointsByFixture.set(
+            prediction.fixture_id,
+            prediction.points_earned ?? 0,
+        )
     })
 
-    return result
+    const answerPointsByFixture = new Map<string, number>()
+    predictionAnswers?.forEach((answer) => {
+        hasPredictedByFixture.add(answer.fixture_id)
+        const current = answerPointsByFixture.get(answer.fixture_id) ?? 0
+        answerPointsByFixture.set(
+            answer.fixture_id,
+            current + (answer.points_earned ?? 0),
+        )
+    })
+
+    return fixtures.map((fixture) => {
+        const hasPredicted = hasPredictedByFixture.has(fixture.id)
+        const isCompleted = fixture.status === 'completed'
+        const scorePoints = scorePointsByFixture.get(fixture.id) ?? 0
+        const answerPoints = answerPointsByFixture.get(fixture.id) ?? 0
+        const totalPoints =
+            hasPredicted && isCompleted ? scorePoints + answerPoints : 0
+
+        return {
+            fixture_id: fixture.id,
+            match_date: fixture.match_date,
+            status: fixture.status,
+            home_score: fixture.home_score,
+            away_score: fixture.away_score,
+            group_name: fixture.group_name,
+            venue: fixture.venue,
+            home_team: fixture.home_team,
+            away_team: fixture.away_team,
+            total_points: totalPoints,
+            has_predicted: hasPredicted,
+        }
+    })
 })
