@@ -7,6 +7,10 @@ export default defineNuxtConfig({
       htmlAttrs: { lang: 'en' },
       charset: 'utf-8',
       title: "Let's Football — FIFA World Cup 2026 Prediction Game",
+      link: [
+        { rel: 'icon', type: 'image/svg+xml', href: '/fifa-world-cup-2026.svg' },
+        { rel: 'apple-touch-icon', href: '/fifa-world-cup-2026.svg' },
+      ],
       meta: [
         {
           name: 'viewport',
