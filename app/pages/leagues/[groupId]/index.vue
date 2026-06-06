@@ -37,8 +37,39 @@
           </div>
           <div class="text-left sm:text-right">
             <p class="text-xs text-slate-500 uppercase tracking-wider font-semibold">Invite code</p>
-            <p class="text-lg font-black tracking-[0.15em] text-emerald-400 mt-1">
-              {{ groupDetail.invite_code }}
+            <div class="flex items-center gap-1.5 mt-1 justify-start sm:justify-end">
+              <p class="text-lg font-black tracking-[0.15em] text-emerald-400">
+                {{ groupDetail.invite_code }}
+              </p>
+              <button
+                type="button"
+                class="p-2 rounded-lg text-slate-400 hover:text-emerald-400 hover:bg-slate-800/80 transition-colors shrink-0"
+                :aria-label="copiedInviteCode ? 'Copied' : 'Copy invite code'"
+                @click="copyInviteCode"
+              >
+                <UIcon
+                  :name="copiedInviteCode ? 'i-heroicons-clipboard-document-check' : 'i-heroicons-clipboard-document'"
+                  class="w-5 h-5"
+                />
+              </button>
+              <button
+                type="button"
+                class="p-2 rounded-lg text-slate-400 hover:text-emerald-400 hover:bg-slate-800/80 transition-colors shrink-0"
+                :aria-label="sharedInvite ? 'Invite shared' : 'Share invite link'"
+                @click="shareInvite"
+              >
+                <UIcon
+                  :name="sharedInvite ? 'i-heroicons-check' : 'i-heroicons-share'"
+                  class="w-5 h-5"
+                />
+              </button>
+            </div>
+            <p
+              v-if="inviteActionMessage"
+              class="text-xs mt-1.5"
+              :class="inviteActionError ? 'text-rose-400' : 'text-emerald-400'"
+            >
+              {{ inviteActionMessage }}
             </p>
           </div>
         </div>
@@ -105,6 +136,7 @@
 import type { GroupDetailResponse } from '~/types/groups'
 import { apiRoutes } from '~/utils/api'
 import { normalizeGroupDetail } from '~/utils/groups'
+import { copyText, shareLeagueInvite } from '~/utils/leagueInvite'
 
 definePageMeta({
   layout: 'auth',
@@ -131,6 +163,67 @@ const {
 )
 
 const groupDetail = computed(() => groupResponse.value)
+
+const copiedInviteCode = ref(false)
+const sharedInvite = ref(false)
+const inviteActionMessage = ref('')
+const inviteActionError = ref(false)
+
+let inviteActionResetTimer: ReturnType<typeof setTimeout> | undefined
+
+function resetInviteActionFeedback() {
+  clearTimeout(inviteActionResetTimer)
+  inviteActionResetTimer = setTimeout(() => {
+    copiedInviteCode.value = false
+    sharedInvite.value = false
+    inviteActionMessage.value = ''
+    inviteActionError.value = false
+  }, 2500)
+}
+
+async function copyInviteCode() {
+  const code = groupDetail.value?.invite_code
+  if (!code) {
+    return
+  }
+
+  try {
+    await copyText(code)
+    copiedInviteCode.value = true
+    sharedInvite.value = false
+    inviteActionError.value = false
+    inviteActionMessage.value = 'Invite code copied'
+    resetInviteActionFeedback()
+  } catch {
+    inviteActionError.value = true
+    inviteActionMessage.value = 'Could not copy invite code'
+    resetInviteActionFeedback()
+  }
+}
+
+async function shareInvite() {
+  const detail = groupDetail.value
+  if (!detail) {
+    return
+  }
+
+  try {
+    const result = await shareLeagueInvite(detail.group.name, detail.invite_code)
+    sharedInvite.value = true
+    copiedInviteCode.value = false
+    inviteActionError.value = false
+    inviteActionMessage.value =
+      result === 'shared' ? 'Invite shared' : 'Invite link copied to clipboard'
+    resetInviteActionFeedback()
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      return
+    }
+    inviteActionError.value = true
+    inviteActionMessage.value = 'Could not share invite'
+    resetInviteActionFeedback()
+  }
+}
 
 function isCurrentUser(memberUserId: string): boolean {
   const currentId = user.value?.id ?? user.value?.sub

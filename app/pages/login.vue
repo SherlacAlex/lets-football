@@ -81,8 +81,10 @@
       <div class="text-center mt-8 pt-6 border-t border-slate-800/80">
         <p class="text-sm text-slate-400">
           Don't have an account?
-          <NuxtLink to="/register"
-            class="text-emerald-400 hover:text-emerald-300 font-semibold transition-colors duration-200">
+          <NuxtLink
+            :to="route.query.redirect ? { path: '/register', query: { redirect: route.query.redirect } } : '/register'"
+            class="text-emerald-400 hover:text-emerald-300 font-semibold transition-colors duration-200"
+          >
             Sign up for free
           </NuxtLink>
         </p>
@@ -99,6 +101,8 @@ definePageMeta({
   middleware: 'guest',
 })
 
+const route = useRoute()
+
 const email = ref('')
 const password = ref('')
 const isLoading = ref(false)
@@ -106,6 +110,14 @@ const errorMessage = ref('')
 const successMessage = ref('')
 
 const client = useSupabaseClient()
+
+const redirectTo = computed(() => {
+  const redirect = route.query.redirect
+  if (typeof redirect === 'string' && redirect.startsWith('/')) {
+    return redirect
+  }
+  return '/dashboard'
+})
 
 const handleLogin = async () => {
   isLoading.value = true
@@ -123,7 +135,7 @@ const handleLogin = async () => {
     } else {
       successMessage.value = 'Login successful! Redirecting...'
       setTimeout(() => {
-        navigateTo('/dashboard')
+        navigateTo(redirectTo.value)
       }, 1000)
     }
   } catch (err: any) {
