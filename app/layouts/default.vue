@@ -8,9 +8,13 @@
       <div class="max-w-7xl mx-auto flex justify-between items-center gap-3">
         <NuxtLink to="/welcome" class="flex items-center gap-2 sm:gap-3 group min-w-0">
           <div
-            class="bg-gradient-to-tr from-emerald-500 to-teal-400 p-1.5 sm:p-2 rounded-xl shadow-lg shadow-emerald-500/20 group-hover:scale-105 transition-transform duration-300 shrink-0"
+            class="bg-white p-1 sm:p-1.5 rounded-xl shadow-lg shadow-emerald-500/20 group-hover:scale-105 transition-transform duration-300 shrink-0"
           >
-            <UIcon name="i-heroicons-trophy" class="w-5 h-5 sm:w-6 sm:h-6 text-slate-950" />
+            <img
+              src="/world-cup.svg"
+              alt=""
+              class="h-5 w-5 sm:h-6 sm:w-6 object-contain object-top"
+            />
           </div>
           <span
             class="text-base sm:text-xl lg:text-2xl font-black tracking-tight bg-gradient-to-r from-white via-slate-100 to-emerald-400 bg-clip-text text-transparent truncate"

@@ -101,6 +101,12 @@ definePageMeta({
   middleware: 'guest',
 })
 
+useAppSeo({
+  title: 'Login',
+  description: 'Sign in to your FIFA World Cup 2026 prediction account.',
+  noIndex: true,
+})
+
 const route = useRoute()
 
 const email = ref('')

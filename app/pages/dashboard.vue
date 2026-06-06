@@ -95,6 +95,12 @@ definePageMeta({
   layout: 'auth',
 })
 
+useAppSeo({
+  title: 'Dashboard',
+  description: 'View FIFA World Cup 2026 fixtures, submit score predictions, and answer bonus match questions.',
+  noIndex: true,
+})
+
 const user = useSupabaseUser()
 const dashboardStore = useDashboardStore()
 

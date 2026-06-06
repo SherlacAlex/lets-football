@@ -159,6 +159,13 @@ definePageMeta({
   layout: 'auth',
 })
 
+useAppSeo({
+  title: 'Prediction Rules',
+  path: '/rules',
+  description:
+    'How scoring works in our FIFA World Cup 2026 prediction game: exact score points, correct result points, bonus questions, and the 8-point maximum per match.',
+})
+
 const bonusQuestions = [
   {
     id: 'yellow-first',

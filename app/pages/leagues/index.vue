@@ -122,6 +122,12 @@ definePageMeta({
   layout: 'auth',
 })
 
+useAppSeo({
+  title: 'Leagues',
+  description: 'Create or join private FIFA World Cup 2026 prediction leagues and compete with friends.',
+  noIndex: true,
+})
+
 const user = useSupabaseUser()
 const requestFetch = useRequestFetch()
 const leagueStore = useLeagueStore()

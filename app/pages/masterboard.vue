@@ -82,6 +82,11 @@ definePageMeta({
   layout: 'auth',
 })
 
+useAppSeo({
+  title: 'Results Admin',
+  noIndex: true,
+})
+
 const requestFetch = useRequestFetch()
 const adminDashboardStore = useAdminDashboardStore()
 

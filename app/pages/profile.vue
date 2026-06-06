@@ -9,6 +9,11 @@ definePageMeta({
   layout: 'auth',
 })
 
+useAppSeo({
+  title: 'Profile',
+  noIndex: true,
+})
+
 const user = useSupabaseUser()
 
 onMounted(() => {

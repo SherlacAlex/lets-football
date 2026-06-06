@@ -22,6 +22,7 @@ export type CreatedGroup = LeagueData
 
 export type LeagueRankingEntry = {
   id: string
+  user_id: string
   username: string
   display_name: string
   total_points: number

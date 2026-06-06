@@ -126,6 +126,12 @@ definePageMeta({
   middleware: 'guest',
 })
 
+useAppSeo({
+  title: 'Sign Up',
+  description: 'Create a free account and start predicting FIFA World Cup 2026 matches.',
+  noIndex: true,
+})
+
 const route = useRoute()
 
 const username = ref('')

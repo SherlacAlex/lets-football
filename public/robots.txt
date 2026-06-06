@@ -1,2 +1,11 @@
-User-Agent: *
-Disallow:
+User-agent: *
+Allow: /welcome
+Allow: /rules
+Disallow: /dashboard
+Disallow: /profile
+Disallow: /leagues
+Disallow: /masterboard
+Disallow: /login
+Disallow: /register
+
+Sitemap: /sitemap.xml

@@ -1,19 +1,20 @@
 <template>
   <div class="relative min-h-[calc(100vh-140px)] flex flex-col justify-center overflow-hidden py-12 sm:py-24">
-    <!-- Neon glowing background graphics -->
     <div class="absolute inset-0 z-0 overflow-hidden">
-      <!-- Glow effect 1 -->
       <div
-        class="absolute -top-[40%] -left-[20%] w-[80%] h-[80%] rounded-full bg-emerald-500/10 blur-[120px] animate-pulse duration-[6000ms]">
-      </div>
-      <!-- Glow effect 2 -->
+        class="absolute inset-0 bg-cover bg-center bg-no-repeat scale-105"
+        style="background-image: url('/FIFA.jpg')"
+        aria-hidden="true"
+      />
+      <div class="absolute inset-0 bg-slate-950/50" aria-hidden="true" />
       <div
-        class="absolute -bottom-[30%] -right-[10%] w-[60%] h-[60%] rounded-full bg-teal-500/10 blur-[100px] animate-pulse duration-[8000ms]">
-      </div>
-      <!-- Grid Overlay -->
+        class="absolute inset-0 bg-gradient-to-b from-slate-950/55 via-slate-950/40 to-slate-950/65"
+        aria-hidden="true"
+      />
       <div
-        class="absolute inset-0 bg-[linear-gradient(to_right,#0f172a_1px,transparent_1px),linear-gradient(to_bottom,#0f172a_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-40">
-      </div>
+        class="absolute -top-[30%] -left-[15%] w-[70%] h-[70%] rounded-full bg-emerald-500/10 blur-[100px] pointer-events-none"
+        aria-hidden="true"
+      />
     </div>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 w-full">
@@ -37,8 +38,8 @@
 
         <!-- Subtitle -->
         <p class="text-lg sm:text-xl text-slate-400 font-normal leading-relaxed">
-          Join the ultimate World Cup bracket prediction app. Challenge friends, analyze statistics, follow match
-          updates, and climb the leaderboard as the matches unfold.
+          Join the ultimate FIFA WORLD CUP 2026 Prediction Contest. Predict scores, challenge friends and climb the
+          leaderboard as the matches unfold.
         </p>
 
         <!-- CTA Buttons -->
@@ -119,9 +120,40 @@
 </template>
 
 <script setup lang="ts">
-// Welcome page does not require authentication
+import { DEFAULT_DESCRIPTION, SITE_NAME } from '~/utils/seo'
+
 definePageMeta({
-  layout: 'default'
+  layout: 'default',
+})
+
+useAppSeo({
+  path: '/welcome',
+  description:
+    'Join the FIFA World Cup 2026 prediction game. Predict match scores, answer bonus questions, create private leagues with friends, and climb the live leaderboard.',
+})
+
+useAppStructuredData({
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: SITE_NAME,
+  description: DEFAULT_DESCRIPTION,
+  applicationCategory: 'GameApplication',
+  operatingSystem: 'Web',
+  offers: {
+    '@type': 'Offer',
+    price: '0',
+    priceCurrency: 'USD',
+  },
+  about: {
+    '@type': 'SportsEvent',
+    name: 'FIFA World Cup 2026',
+  },
+  featureList: [
+    'Live World Cup 2026 score predictions',
+    'Bonus match questions',
+    'Private prediction leagues',
+    'Real-time leaderboard',
+  ],
 })
 
 const user = useSupabaseUser()

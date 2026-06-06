@@ -139,6 +139,12 @@ definePageMeta({
   layout: 'auth',
 })
 
+useAppSeo({
+  title: 'Member Predictions',
+  description: 'View a league member’s FIFA World Cup 2026 match predictions.',
+  noIndex: true,
+})
+
 const route = useRoute()
 const user = useSupabaseUser()
 const requestFetch = useRequestFetch()

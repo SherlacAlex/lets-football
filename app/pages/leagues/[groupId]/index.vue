@@ -164,6 +164,15 @@ const {
 
 const groupDetail = computed(() => groupResponse.value)
 
+useAppSeo({
+  title: computed(() => groupDetail.value?.group.name ?? 'League'),
+  description: computed(
+    () =>
+      `FIFA World Cup 2026 prediction league standings for ${groupDetail.value?.group.name ?? 'your league'}.`,
+  ),
+  noIndex: true,
+})
+
 const copiedInviteCode = ref(false)
 const sharedInvite = ref(false)
 const inviteActionMessage = ref('')

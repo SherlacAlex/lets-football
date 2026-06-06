@@ -8,9 +8,13 @@
         <div class="h-16 lg:h-20 flex items-center px-4 lg:px-6 border-b border-slate-800 shrink-0">
           <NuxtLink to="/" class="flex items-center gap-3 group min-w-0">
             <div
-              class="bg-gradient-to-tr from-emerald-500 to-teal-400 p-2 rounded-xl shadow-lg shadow-emerald-500/20 group-hover:scale-105 transition-transform duration-300 shrink-0"
+              class="bg-white p-1.5 rounded-xl shadow-lg shadow-emerald-500/20 group-hover:scale-105 transition-transform duration-300 shrink-0"
             >
-              <UIcon name="i-heroicons-trophy" class="w-6 h-6 text-slate-950" />
+              <img
+                src="/world-cup.svg"
+                alt=""
+                class="h-6 w-6 object-contain object-top"
+              />
             </div>
             <span
               class="text-base lg:text-lg font-black tracking-tight bg-gradient-to-r from-white via-slate-100 to-emerald-400 bg-clip-text text-transparent truncate"
@@ -57,9 +61,13 @@
       >
         <div class="flex items-center gap-3 min-w-0 md:hidden">
           <div
-            class="bg-gradient-to-tr from-emerald-500 to-teal-400 p-1.5 rounded-lg shadow-lg shadow-emerald-500/20 shrink-0"
+            class="bg-white p-1 rounded-lg shadow-lg shadow-emerald-500/20 shrink-0"
           >
-            <UIcon name="i-heroicons-trophy" class="w-5 h-5 text-slate-950" />
+            <img
+              src="/world-cup.svg"
+              alt=""
+              class="h-5 w-5 object-contain object-top"
+            />
           </div>
           <span class="text-sm font-bold text-white truncate">Let's Football</span>
         </div>
