@@ -41,34 +41,21 @@
               <p class="text-lg font-black tracking-[0.15em] text-emerald-400">
                 {{ groupDetail.invite_code }}
               </p>
-              <button
-                type="button"
+              <button type="button"
                 class="p-2 rounded-lg text-slate-400 hover:text-emerald-400 hover:bg-slate-800/80 transition-colors shrink-0"
-                :aria-label="copiedInviteCode ? 'Copied' : 'Copy invite code'"
-                @click="copyInviteCode"
-              >
+                :aria-label="copiedInviteCode ? 'Copied' : 'Copy invite code'" @click="copyInviteCode">
                 <UIcon
                   :name="copiedInviteCode ? 'i-heroicons-clipboard-document-check' : 'i-heroicons-clipboard-document'"
-                  class="w-5 h-5"
-                />
+                  class="w-5 h-5" />
               </button>
-              <button
-                type="button"
+              <button type="button"
                 class="p-2 rounded-lg text-slate-400 hover:text-emerald-400 hover:bg-slate-800/80 transition-colors shrink-0"
-                :aria-label="sharedInvite ? 'Invite shared' : 'Share invite link'"
-                @click="shareInvite"
-              >
-                <UIcon
-                  :name="sharedInvite ? 'i-heroicons-check' : 'i-heroicons-share'"
-                  class="w-5 h-5"
-                />
+                :aria-label="sharedInvite ? 'Invite shared' : 'Share invite link'" @click="shareInvite">
+                <UIcon :name="sharedInvite ? 'i-heroicons-check' : 'i-heroicons-share'" class="w-5 h-5" />
               </button>
             </div>
-            <p
-              v-if="inviteActionMessage"
-              class="text-xs mt-1.5"
-              :class="inviteActionError ? 'text-rose-400' : 'text-emerald-400'"
-            >
+            <p v-if="inviteActionMessage" class="text-xs mt-1.5"
+              :class="inviteActionError ? 'text-rose-400' : 'text-emerald-400'">
               {{ inviteActionMessage }}
             </p>
           </div>
@@ -77,13 +64,17 @@
 
       <div class="bg-slate-900/40 border border-slate-800/80 rounded-3xl overflow-hidden backdrop-blur-md">
         <div class="overflow-x-auto">
-          <table class="w-full text-sm text-left">
+          <table class="w-full text-sm text-left table-fixed sm:table-auto">
             <thead>
               <tr class="border-b border-slate-800 text-xs uppercase tracking-wider text-slate-500">
-                <th class="px-3 sm:px-6 py-3 sm:py-4 font-semibold w-12 sm:w-16">#</th>
-                <th class="px-3 sm:px-6 py-3 sm:py-4 font-semibold">Player</th>
-                <th class="px-3 sm:px-6 py-3 sm:py-4 font-semibold text-right">Pts</th>
-                <th class="px-3 sm:px-6 py-3 sm:py-4 font-semibold text-right w-24 sm:w-32">View</th>
+                <th class="px-3 sm:px-6 py-3 sm:py-4 font-semibold w-10 sm:w-14">#</th>
+                <th class="px-3 sm:px-6 py-3 sm:py-4 font-semibold min-w-0">Player</th>
+                <th class="px-3 sm:px-6 py-3 sm:py-4 font-semibold text-right w-12 sm:w-16 shrink-0">
+                  Pts
+                </th>
+                <th class="px-3 sm:px-6 py-3 sm:py-4 font-semibold text-right w-[9.25rem] sm:w-44 shrink-0">
+                  Predictions
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -112,15 +103,16 @@
                     </span>
                   </span>
                 </td>
-                <td class="px-3 sm:px-6 py-3 sm:py-4 text-right font-bold text-indigo-400 tabular-nums">
+                <td
+                  class="px-3 sm:px-6 py-3 sm:py-4 text-right font-bold text-indigo-400 tabular-nums w-12 sm:w-16 shrink-0">
                   {{ member.total_points }}
                 </td>
-                <td class="px-3 sm:px-6 py-3 sm:py-4 text-right">
+                <td class="px-3 sm:px-6 py-3 sm:py-4 text-right w-[9.25rem] sm:w-44 shrink-0">
                   <NuxtLink :to="memberPredictionsPath(member.user_id)"
-                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 border border-emerald-500/20 transition-colors"
+                    class="inline-flex items-center justify-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 border border-emerald-500/20 transition-colors whitespace-nowrap"
                     @click.stop>
-                    <UIcon name="i-heroicons-eye" class="w-4 h-4" />
-                    View
+                    <UIcon name="i-heroicons-eye" class="w-4 h-4 shrink-0" />
+                    View Predictions
                   </NuxtLink>
                 </td>
               </tr>
