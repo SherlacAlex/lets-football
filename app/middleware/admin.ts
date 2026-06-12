@@ -1,7 +1,5 @@
 // ~/middleware/admin.ts
 export default defineNuxtRouteMiddleware(async (to, from) => {
-    console.log("[admin middleware] Running on:", to.path);
-
     const supabase = useSupabaseClient();
 
     // Get authenticated user directly – this waits for a valid session
