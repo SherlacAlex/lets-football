@@ -203,7 +203,7 @@ import type { FixtureListItem } from '~/types/fixtures'
 import type { FixtureQuestion } from '~/types/questions'
 import type { Prediction, PredictFixtureRequest, PredictionAnswer } from '~/types/predictions'
 import { apiRoutes } from '~/utils/api'
-import { formatMatchDate } from '~/utils/fixtures'
+import { formatMatchDate, isPredictionLocked } from '~/utils/fixtures'
 import {
   isQuestionUnanswered,
   isScoreMissing,
@@ -256,7 +256,10 @@ const scoreHasError = computed(
     isScoreMissing(predictedHomeScore.value, predictedAwayScore.value),
 )
 
-const canEditPredictions = computed(() => props.fixture?.can_predict ?? false)
+const canEditPredictions = computed(() => {
+  if (!props.fixture?.can_predict) return false
+  return !isPredictionLocked(props.fixture)
+})
 
 const hasFinalScore = computed(
   () =>
