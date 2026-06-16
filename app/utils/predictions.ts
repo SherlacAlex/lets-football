@@ -105,6 +105,10 @@ export function formatPredictionAnswerDisplay(
   homeTeam?: AnswerTeam | null,
   awayTeam?: AnswerTeam | null,
 ): string {
+  if (!answerValue?.trim()) {
+    return 'NONE'
+  }
+
   if (answerType === 'BOOLEAN') {
     if (answerValue === 'true') return 'Yes'
     if (answerValue === 'false') return 'No'

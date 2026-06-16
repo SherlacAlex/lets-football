@@ -53,6 +53,7 @@
             :fixture="item.fixture"
             :actual-result="item.actual_result"
             @open-results="openResults(item)"
+            @match-started="onMatchStarted"
           />
         </div>
       </div>
@@ -123,6 +124,10 @@ function openResults(item: AdminDashboardFixture) {
   selectedFixture.value = item.fixture
   selectedResult.value = item.actual_result
   isResultsOpen.value = true
+}
+
+function onMatchStarted(fixtureId: string) {
+  adminDashboardStore.setFixtureStatus(fixtureId, 'live')
 }
 
 function scrollToFirstScheduledMatch(smooth = false) {

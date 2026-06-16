@@ -1,27 +1,20 @@
 <template>
   <div class="space-y-8">
     <div class="flex flex-wrap items-center gap-4">
-      <NuxtLink
-        :to="`/leagues/${groupId}`"
-        class="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-emerald-400 transition-colors"
-      >
+      <NuxtLink :to="`/leagues/${groupId}`"
+        class="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-emerald-400 transition-colors">
         <UIcon name="i-heroicons-arrow-left" class="w-4 h-4" />
         Back to league table
       </NuxtLink>
     </div>
 
-    <div
-      v-if="predictionsError"
-      class="p-4 rounded-2xl border border-rose-500/20 bg-rose-500/10 text-rose-400 text-sm flex items-start gap-2"
-    >
+    <div v-if="predictionsError"
+      class="p-4 rounded-2xl border border-rose-500/20 bg-rose-500/10 text-rose-400 text-sm flex items-start gap-2">
       <UIcon name="i-heroicons-exclamation-triangle" class="w-5 h-5 shrink-0 mt-0.5" />
       <span>Could not load predictions. {{ predictionsError.message }}</span>
     </div>
 
-    <div
-      v-if="predictionsPending"
-      class="grid grid-cols-1 lg:grid-cols-2 gap-6"
-    >
+    <div v-if="predictionsPending" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <AppCard v-for="n in 4" :key="n" class="animate-pulse !hover:border-slate-800">
         <div class="h-4 bg-slate-800 rounded w-1/3 mb-6" />
         <div class="h-16 bg-slate-800/60 rounded-2xl" />
@@ -29,30 +22,24 @@
     </div>
 
     <template v-else>
-      <div class="relative overflow-hidden bg-slate-900/40 border border-slate-800/80 rounded-3xl p-6 sm:p-8 backdrop-blur-md">
+      <div
+        class="relative overflow-hidden bg-slate-900/40 border border-slate-800/80 rounded-3xl p-6 sm:p-8 backdrop-blur-md">
         <h1 class="text-2xl font-extrabold text-white">Match predictions</h1>
         <p class="text-slate-400 text-sm mt-2">
           All fixtures for this member. Tap a completed match to view their full prediction.
         </p>
       </div>
 
-      <div
-        v-if="!fixturePoints.length"
-        class="text-center py-16 bg-slate-900/40 border border-slate-800/80 rounded-3xl"
-      >
+      <div v-if="!fixturePoints.length"
+        class="text-center py-16 bg-slate-900/40 border border-slate-800/80 rounded-3xl">
         <p class="text-slate-400 text-sm">No fixtures scheduled yet.</p>
       </div>
 
       <div v-else class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <component
-          :is="canViewFixture(fixture) ? 'button' : 'div'"
-          v-for="fixture in fixturePoints"
-          :key="fixture.fixture_id"
-          :type="canViewFixture(fixture) ? 'button' : undefined"
-          class="w-full text-left"
+        <component :is="canViewFixture(fixture) ? 'button' : 'div'" v-for="fixture in fixturePoints"
+          :key="fixture.fixture_id" :type="canViewFixture(fixture) ? 'button' : undefined" class="w-full text-left"
           :class="canViewFixture(fixture) ? 'cursor-pointer' : 'cursor-default'"
-          @click="canViewFixture(fixture) ? openFixture(fixture.fixture_id) : undefined"
-        >
+          @click="canViewFixture(fixture) ? openFixture(fixture.fixture_id) : undefined">
           <AppCard :class="canViewFixture(fixture) ? '!hover:border-slate-700' : '!hover:border-slate-800'">
             <div class="flex justify-between items-center text-xs text-slate-500 mb-4 gap-2 flex-wrap">
               <span>
@@ -60,22 +47,16 @@
                 <template v-if="fixture.group_name"> &bull; {{ fixture.group_name }}</template>
               </span>
               <div class="flex items-center gap-2">
-                <span
-                  v-if="fixture.status === 'completed' && fixture.has_predicted"
-                  class="px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-500/10 text-indigo-400 border border-indigo-500/30"
-                >
+                <span v-if="(fixture.status === 'completed' || fixture.status === 'live') && fixture.has_predicted"
+                  class="px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-500/10 text-indigo-400 border border-indigo-500/30">
                   Predicted
                 </span>
-                <span
-                  v-else-if="fixture.status === 'completed'"
-                  class="px-2 py-0.5 rounded-full text-xs font-medium bg-rose-500/10 text-rose-400 border border-rose-500/30"
-                >
+                <span v-else-if="fixture.status === 'completed'"
+                  class="px-2 py-0.5 rounded-full text-xs font-medium bg-rose-500/10 text-rose-400 border border-rose-500/30">
                   Not predicted
                 </span>
-                <span
-                  class="px-2 py-0.5 rounded-full border text-xs font-medium capitalize"
-                  :class="statusBadgeClass(fixture.status)"
-                >
+                <span class="px-2 py-0.5 rounded-full border text-xs font-medium capitalize"
+                  :class="statusBadgeClass(fixture.status)">
                   {{ statusLabel(fixture.status) }}
                 </span>
               </div>
@@ -83,10 +64,7 @@
 
             <div class="flex items-center justify-between gap-4 py-2">
               <FixtureTeamDisplay :team="toTeam(fixture.home_team)" align="home" />
-              <FixtureScoreDisplay
-                :home-score="fixture.home_score"
-                :away-score="fixture.away_score"
-              />
+              <FixtureScoreDisplay :home-score="fixture.home_score" :away-score="fixture.away_score" />
               <FixtureTeamDisplay :team="toTeam(fixture.away_team)" align="away" />
             </div>
 
@@ -95,11 +73,8 @@
                 <p class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">
                   Points earned
                 </p>
-                <p
-                  v-if="fixture.status === 'completed'"
-                  class="text-lg font-bold tabular-nums leading-tight"
-                  :class="fixture.total_points > 0 ? 'text-emerald-400' : 'text-rose-400'"
-                >
+                <p v-if="fixture.status === 'completed'" class="text-lg font-bold tabular-nums leading-tight"
+                  :class="fixture.total_points > 0 ? 'text-emerald-400' : 'text-rose-400'">
                   {{ fixture.total_points }}
                   <span class="text-xs font-semibold">
                     {{ fixture.total_points === 1 ? 'pt' : 'pts' }}
@@ -108,10 +83,7 @@
                 <p v-else class="text-sm text-slate-500">—</p>
               </div>
 
-              <span
-                v-if="canViewFixture(fixture)"
-                class="shrink-0 text-xs font-bold text-emerald-400"
-              >
+              <span v-if="canViewFixture(fixture)" class="shrink-0 text-xs font-bold text-emerald-400">
                 View prediction
               </span>
             </div>
@@ -120,12 +92,8 @@
       </div>
     </template>
 
-    <LeagueMemberPredictionDialog
-      v-model:open="isPredictionOpen"
-      :group-id="groupId"
-      :user-id="userId"
-      :fixture-id="selectedFixtureId"
-    />
+    <LeagueMemberPredictionDialog v-model:open="isPredictionOpen" :group-id="groupId" :user-id="userId"
+      :fixture-id="selectedFixtureId" />
   </div>
 </template>
 
@@ -183,7 +151,7 @@ function toTeam(team: MemberFixturePoints['home_team']): Team {
 }
 
 function canViewFixture(fixture: MemberFixturePoints) {
-  return fixture.has_predicted && fixture.status === 'completed'
+  return fixture.has_predicted && (fixture.status === 'completed' || fixture.status === 'live')
 }
 
 function openFixture(fixtureId: string) {

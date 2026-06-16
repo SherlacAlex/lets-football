@@ -7,6 +7,7 @@ export const apiRoutes = {
     adminFixtureAnswers: (fixtureId: string) =>
         `/api/admin/fixtures/${fixtureId}/answers`,
     fixtures: "/api/fixtures",
+    fixtureStatus: (fixtureId: string) => `/api/fixtures/${fixtureId}/status`,
     predictFixture: (fixtureId: string) => `/api/fixtures/${fixtureId}/predict`,
     groups: "/api/groups",
     joinGroup: "/api/groups/join",

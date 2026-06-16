@@ -48,10 +48,25 @@ export function useAdminDashboardStore() {
     })
   }
 
+  function setFixtureStatus(fixtureId: string, status: AdminDashboardFixture['fixture']['status']) {
+    items.value = items.value.map((item) =>
+      item.fixture.id === fixtureId
+        ? {
+            ...item,
+            fixture: {
+              ...item.fixture,
+              status,
+            },
+          }
+        : item,
+    )
+  }
+
   return {
     items,
     setItems,
     getQuestionsForFixture,
     setResultForFixture,
+    setFixtureStatus,
   }
 }

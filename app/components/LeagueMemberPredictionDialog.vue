@@ -96,8 +96,14 @@
                     {{ answer.points_earned }} pts
                   </span>
                 </div>
+                <p
+                  v-if="isEmptyAnswer(answer)"
+                  class="text-sm font-semibold text-slate-500"
+                >
+                  NONE
+                </p>
                 <div
-                  v-if="team"
+                  v-else-if="team"
                   class="flex items-center gap-2.5"
                   :class="isAnswerCorrect(answer) ? 'text-emerald-400' : 'text-white'"
                 >
@@ -215,6 +221,10 @@ function isAnswerCorrect(answer: PredictionAnswer) {
   return answer.points_earned > 0
 }
 
+function isEmptyAnswer(answer: PredictionAnswer) {
+  return !answer.answer_value?.trim()
+}
+
 function matchResultCardClass(data: MemberFixturePredictionDetail) {
   const base = 'rounded-2xl p-4 space-y-3'
   return isScoreCorrect(data)
@@ -251,6 +261,10 @@ function resolveAnswerTeam(
   answer: PredictionAnswer,
   data: MemberFixturePredictionDetail,
 ): Team | null {
+  if (!answer.answer_value?.trim()) {
+    return null
+  }
+
   if (answer.question_template.answer_type !== 'TEAM') {
     return null
   }
