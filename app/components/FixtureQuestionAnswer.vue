@@ -1,14 +1,6 @@
 <template>
-  <input
-    v-if="answerType === 'NUMBER'"
-    v-model="answer"
-    type="number"
-    min="0"
-    inputmode="numeric"
-    placeholder="Enter a number"
-    :disabled="disabled"
-    :class="inputClass"
-  />
+  <input v-if="answerType === 'NUMBER'" v-model="answer" type="number" min="0" inputmode="numeric"
+    placeholder="Enter a number" :disabled="disabled" :class="inputClass" />
   <select v-else v-model="answer" :disabled="disabled" :class="selectClass">
     <option v-for="option in options" :key="option.label" :value="option.value">
       {{ option.label }}
@@ -63,7 +55,7 @@ const options = computed(() => {
 
   if (type === 'TEAM') {
     return [
-      { value: '', label: 'None' },
+      { value: 'NONE', label: 'None' },
       { value: props.fixture.home_team.id, label: props.fixture.home_team.name },
       { value: props.fixture.away_team.id, label: props.fixture.away_team.name },
     ]
