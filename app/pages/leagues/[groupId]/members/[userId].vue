@@ -37,7 +37,8 @@
 
       <div v-else class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <component :is="canViewFixture(fixture) ? 'button' : 'div'" v-for="fixture in fixturePoints"
-          :key="fixture.fixture_id" :type="canViewFixture(fixture) ? 'button' : undefined" class="w-full text-left"
+          :id="fixtureCardElementId(fixture.fixture_id)" :key="fixture.fixture_id"
+          :type="canViewFixture(fixture) ? 'button' : undefined" class="w-full text-left scroll-mt-24"
           :class="canViewFixture(fixture) ? 'cursor-pointer' : 'cursor-default'"
           @click="canViewFixture(fixture) ? openFixture(fixture.fixture_id) : undefined">
           <AppCard :class="canViewFixture(fixture) ? '!hover:border-slate-700' : '!hover:border-slate-800'">
@@ -101,6 +102,7 @@
 import type { MemberFixturePoints } from '~/types/groups'
 import type { Team } from '~/types/fixtures'
 import { apiRoutes } from '~/utils/api'
+import { fixtureCardElementId, scrollToFixtureCard } from '~/utils/dashboard'
 import { formatMatchDate, statusBadgeClass, statusLabel } from '~/utils/fixtures'
 
 definePageMeta({
@@ -159,9 +161,32 @@ function openFixture(fixtureId: string) {
   isPredictionOpen.value = true
 }
 
+function scrollToFirstScheduledMatch(smooth = false) {
+  const first = fixturePoints.value.find((fixture) => fixture.status === 'scheduled')
+  if (!first) {
+    return
+  }
+  nextTick(() => {
+    scrollToFixtureCard(first.fixture_id, smooth)
+  })
+}
+
+watch(
+  () => predictionsPending.value,
+  (pending, wasPending) => {
+    if (wasPending && !pending && fixturePoints.value.length) {
+      scrollToFirstScheduledMatch()
+    }
+  },
+)
+
 onMounted(() => {
   if (!user.value) {
     navigateTo('/login')
+    return
+  }
+  if (!predictionsPending.value && fixturePoints.value.length) {
+    scrollToFirstScheduledMatch()
   }
 })
 </script>

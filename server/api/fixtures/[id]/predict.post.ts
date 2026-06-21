@@ -1,4 +1,5 @@
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
+import { isPredictionLocked } from '~/utils/fixtures'
 
 export default defineEventHandler(async (event) => {
     const supabase = await serverSupabaseClient(event)
@@ -11,11 +12,13 @@ export default defineEventHandler(async (event) => {
     // Validate fixture status
     const { data: fixture, error: fixtureError } = await supabase
         .from('fixtures')
-        .select('status')
+        .select('status, match_date')
         .eq('id', fixtureId)
         .single()
     if (fixtureError || !fixture) throw createError({ statusCode: 404, message: 'Fixture not found' })
-    if (fixture.status !== 'scheduled') throw createError({ statusCode: 400, message: 'Prediction closed' })
+    if (fixture.status !== 'scheduled' || isPredictionLocked(fixture)) {
+        throw createError({ statusCode: 400, message: 'Prediction closed' })
+    }
 
     // Upsert score prediction
     const { error: scoreError } = await supabase

@@ -2,10 +2,10 @@
   <div class="space-y-8">
     <div>
       <div
-        class="relative overflow-hidden bg-slate-900/40 border border-slate-800/80 rounded-3xl p-5 sm:p-6 backdrop-blur-md mb-6"
-      >
+        class="relative overflow-hidden bg-slate-900/40 border border-slate-800/80 rounded-3xl p-5 sm:p-6 backdrop-blur-md mb-6">
         <div class="absolute -right-10 -top-10 w-36 h-36 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none" />
-        <div class="absolute -left-16 -bottom-16 w-40 h-40 bg-emerald-500/5 rounded-full blur-2xl pointer-events-none" />
+        <div
+          class="absolute -left-16 -bottom-16 w-40 h-40 bg-emerald-500/5 rounded-full blur-2xl pointer-events-none" />
 
         <div class="relative z-10 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div class="min-w-0">
@@ -21,18 +21,12 @@
             </p>
           </div>
 
-          <UserTotalPointsStat
-            :points="userTotalPoints"
-            :pending="fixturesPending"
-            class="shrink-0"
-          />
+          <UserTotalPointsStat :points="userTotalPoints" :pending="fixturesPending" class="shrink-0" />
         </div>
       </div>
 
-      <div
-        v-if="fixturesError"
-        class="p-4 mb-6 rounded-2xl border border-rose-500/20 bg-rose-500/10 text-rose-400 text-sm flex items-start gap-2"
-      >
+      <div v-if="fixturesError"
+        class="p-4 mb-6 rounded-2xl border border-rose-500/20 bg-rose-500/10 text-rose-400 text-sm flex items-start gap-2">
         <UIcon name="i-heroicons-exclamation-triangle" class="w-5 h-5 shrink-0 mt-0.5" />
         <span>Could not load fixtures. {{ fixturesError.message }}</span>
       </div>
@@ -44,39 +38,23 @@
         </AppCard>
       </div>
 
-      <div
-        v-else-if="!dashboardItems.length"
-        class="text-center py-16 bg-slate-900/40 border border-slate-800/80 rounded-3xl"
-      >
+      <div v-else-if="!dashboardItems.length"
+        class="text-center py-16 bg-slate-900/40 border border-slate-800/80 rounded-3xl">
         <UIcon name="i-heroicons-calendar-days" class="w-12 h-12 text-slate-600 mx-auto mb-4" />
         <p class="text-slate-400 text-sm">No fixtures scheduled yet. Check back soon.</p>
       </div>
 
-      <div
-        v-if="!fixturesPending && dashboardItems.length"
-        class="grid grid-cols-1 lg:grid-cols-2 gap-6"
-      >
-        <div
-          v-for="item in dashboardItems"
-          :id="fixtureCardElementId(item.fixture.id)"
-          :key="item.fixture.id"
-          class="scroll-mt-24"
-        >
-          <FixturePredictionCard
-            :fixture="item.fixture"
-            :prediction="item.prediction"
-            :answers="item.answers"
-            @open-predictions="openPredictions(item)"
-          />
+      <div v-if="!fixturesPending && dashboardItems.length" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div v-for="item in dashboardItems" :id="fixtureCardElementId(item.fixture.id)" :key="item.fixture.id"
+          class="scroll-mt-24">
+          <FixturePredictionCard :fixture="item.fixture" :prediction="item.prediction" :answers="item.answers"
+            @open-predictions="openPredictions(item)" />
         </div>
       </div>
     </div>
 
-    <FixturePredictionsDialog
-      v-model:open="isPredictionsOpen"
-      :fixture="selectedFixture"
-      :existing-prediction="selectedPrediction"
-    />
+    <FixturePredictionsDialog v-model:open="isPredictionsOpen" :fixture="selectedFixture"
+      :existing-prediction="selectedPrediction" />
   </div>
 </template>
 
@@ -140,12 +118,6 @@ watch(
     }
   },
 )
-
-watch(isPredictionsOpen, (open, wasOpen) => {
-  if (wasOpen && !open) {
-    scrollToFirstScheduledMatch(true)
-  }
-})
 
 onMounted(() => {
   if (!user.value) {

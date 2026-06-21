@@ -1,41 +1,29 @@
 <template>
   <Teleport to="body">
-    <div
-      v-if="open && fixture"
-      class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6"
-      role="dialog"
-      aria-modal="true"
-      :aria-labelledby="titleId"
-    >
+    <div v-if="open && fixture" class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6" role="dialog"
+      aria-modal="true" :aria-labelledby="titleId">
       <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm" @click="close" />
 
       <div
-        class="relative w-full max-w-lg max-h-[90dvh] flex flex-col bg-slate-900 border border-slate-800 rounded-2xl sm:rounded-3xl shadow-2xl"
-      >
+        class="relative w-full max-w-lg max-h-[90dvh] flex flex-col bg-slate-900 border border-slate-800 rounded-2xl sm:rounded-3xl shadow-2xl">
         <div class="flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4 border-b border-slate-800 shrink-0">
           <h2 :id="titleId" class="text-lg font-extrabold text-white">
             Predictions
           </h2>
-          <button
-            type="button"
+          <button type="button"
             class="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
-            aria-label="Close"
-            @click="close"
-          >
+            aria-label="Close" @click="close">
             <UIcon name="i-heroicons-x-mark" class="w-5 h-5" />
           </button>
         </div>
 
         <div class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
-          <div
-            v-if="formMessage"
-            :class="[
-              formMessageType === 'success'
-                ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
-                : 'bg-rose-500/10 border-rose-500/20 text-rose-400',
-              'p-3 rounded-2xl border text-sm',
-            ]"
-          >
+          <div v-if="formMessage" :class="[
+            formMessageType === 'success'
+              ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+              : 'bg-rose-500/10 border-rose-500/20 text-rose-400',
+            'p-3 rounded-2xl border text-sm',
+          ]">
             {{ formMessage }}
           </div>
 
@@ -50,17 +38,11 @@
                   <template v-if="fixture.group_name"> &bull; {{ fixture.group_name }}</template>
                 </p>
               </div>
-              <span
-                v-if="canEditPredictions"
-                class="text-xs font-bold text-emerald-400 shrink-0"
-              >
+              <span v-if="canEditPredictions" class="text-xs font-bold text-emerald-400 shrink-0">
                 Up to 5 pts
               </span>
-              <span
-                v-else-if="existingPrediction && scorePointsEarned != null"
-                class="text-xs font-bold shrink-0"
-                :class="isScoreCorrect ? 'text-emerald-400' : 'text-slate-500'"
-              >
+              <span v-else-if="existingPrediction && scorePointsEarned != null" class="text-xs font-bold shrink-0"
+                :class="isScoreCorrect ? 'text-emerald-400' : 'text-slate-500'">
                 {{ scorePointsEarned }} {{ scorePointsEarned === 1 ? 'pt' : 'pts' }}
               </span>
             </div>
@@ -78,38 +60,22 @@
                   </p>
                 </div>
 
-                <div
-                  v-if="canEditPredictions"
-                  class="w-full text-center rounded-xl px-3 py-2 border"
-                  :class="predictionInputClass"
-                >
+                <div v-if="canEditPredictions" class="w-full text-center rounded-xl px-3 py-2 border"
+                  :class="predictionInputClass">
                   <p class="text-[10px] uppercase tracking-wider font-semibold mb-2 text-slate-400">
                     Predicted
                   </p>
                   <div class="flex items-center justify-center gap-2">
-                    <input
-                      v-model.number="predictedHomeScore"
-                      type="number"
-                      min="0"
-                      placeholder="0"
-                      class="w-11 h-11 sm:w-12 sm:h-12 bg-slate-950 border border-slate-800 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-xl text-center font-bold text-base text-white focus:outline-none"
-                    />
+                    <input v-model.number="predictedHomeScore" type="number" min="0" placeholder="0"
+                      class="w-11 h-11 sm:w-12 sm:h-12 bg-slate-950 border border-slate-800 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-xl text-center font-bold text-base text-white focus:outline-none" />
                     <span class="text-slate-600 font-bold">-</span>
-                    <input
-                      v-model.number="predictedAwayScore"
-                      type="number"
-                      min="0"
-                      placeholder="0"
-                      class="w-11 h-11 sm:w-12 sm:h-12 bg-slate-950 border border-slate-800 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-xl text-center font-bold text-base text-white focus:outline-none"
-                    />
+                    <input v-model.number="predictedAwayScore" type="number" min="0" placeholder="0"
+                      class="w-11 h-11 sm:w-12 sm:h-12 bg-slate-950 border border-slate-800 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-xl text-center font-bold text-base text-white focus:outline-none" />
                   </div>
                 </div>
 
-                <div
-                  v-else-if="existingPrediction"
-                  class="w-full text-center rounded-xl px-3 py-2 border"
-                  :class="predictionScoreClass"
-                >
+                <div v-else-if="existingPrediction" class="w-full text-center rounded-xl px-3 py-2 border"
+                  :class="predictionScoreClass">
                   <p class="text-[10px] uppercase tracking-wider font-semibold mb-1">
                     Predicted
                   </p>
@@ -132,64 +98,45 @@
           </div>
 
           <ol v-else class="space-y-3 list-none p-0 m-0">
-            <li
-              v-for="(question, index) in questions"
-              :key="question.id"
-              :class="questionCardClass(question)"
-            >
+            <li v-for="(question, index) in questions" :key="question.id" :class="questionCardClass(question)">
               <div class="flex items-start gap-3">
                 <span
-                  class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-900 border border-slate-800 text-xs font-bold text-slate-400"
-                >
+                  class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-900 border border-slate-800 text-xs font-bold text-slate-400">
                   {{ index + 1 }}
                 </span>
                 <div class="flex-1 min-w-0">
                   <div class="flex flex-wrap items-center gap-2 mb-1">
                     <span
-                      class="inline-flex px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                    >
+                      class="inline-flex px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                       {{ question.points }} {{ question.points === 1 ? 'pt' : 'pts' }}
                     </span>
-                    <span
-                      v-if="!canEditPredictions && isQuestionCorrect(question)"
-                      class="inline-flex px-2 py-0.5 rounded-full text-xs font-bold border bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
-                    >
+                    <span v-if="!canEditPredictions && isQuestionCorrect(question)"
+                      class="inline-flex px-2 py-0.5 rounded-full text-xs font-bold border bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
                       +{{ getQuestionPointsEarned(question) }} earned
                     </span>
                   </div>
                   <p class="text-sm text-slate-200 leading-relaxed">
                     {{ question.question_template.question }}
                   </p>
-                  <FixtureQuestionAnswer
-                    v-model="answers[question.id]"
-                    :question="question"
-                    :fixture="fixture"
-                    :disabled="!canEditPredictions"
-                    :is-correct="!canEditPredictions && isQuestionCorrect(question)"
-                    :has-error="questionHasError(question.id)"
-                  />
+                  <FixtureQuestionAnswer v-model="answers[question.id]" :question="question" :fixture="fixture"
+                    :disabled="!canEditPredictions" :is-correct="!canEditPredictions && isQuestionCorrect(question)"
+                    :has-error="questionHasError(question.id)" />
                 </div>
               </div>
             </li>
           </ol>
         </div>
 
-        <div class="shrink-0 flex items-center justify-end gap-2 sm:gap-3 px-4 py-3 sm:px-6 sm:py-4 border-t border-slate-800 bg-slate-900/95">
-          <button
-            type="button"
+        <div
+          class="shrink-0 flex items-center justify-end gap-2 sm:gap-3 px-4 py-3 sm:px-6 sm:py-4 border-t border-slate-800 bg-slate-900/95">
+          <button type="button"
             class="px-5 py-2.5 rounded-xl border border-slate-700 text-sm font-semibold text-slate-300 hover:bg-slate-800 transition-colors"
-            :disabled="saving"
-            @click="close"
-          >
+            :disabled="saving" @click="close">
             {{ canEditPredictions ? 'Cancel' : 'Close' }}
           </button>
-          <button
-            v-if="canEditPredictions"
-            type="button"
+          <button v-if="canEditPredictions" type="button"
             class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 text-sm font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-            :disabled="isSubmitDisabled"
-            @click="submit"
-          >
+            :disabled="isSubmitDisabled" @click="submit">
             {{ saving ? 'Saving…' : hasExistingPrediction ? 'Update' : 'Save' }}
           </button>
         </div>
@@ -453,9 +400,8 @@ async function submit() {
     setTimeout(() => {
       close()
     }, 800)
-  } catch (err) {
-    formMessage.value =
-      err instanceof Error ? err.message : 'Failed to save predictions.'
+  } catch (err: any) {
+    formMessage.value = err.data?.message ? err.data.message : 'Failed to save predictions.'
     formMessageType.value = 'error'
   } finally {
     saving.value = false
