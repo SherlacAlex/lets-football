@@ -6,7 +6,7 @@ export default defineEventHandler(async (event) => {
     const user = await serverSupabaseUser(event);
     if (!user) throw createError({ statusCode: 401, message: "Unauthorized" });
 
-    const { name } = await readBody(event);
+    const { name, fromStart = true } = await readBody(event)
     if (!name)
         throw createError({ statusCode: 400, message: "League name required" });
 
@@ -17,7 +17,7 @@ export default defineEventHandler(async (event) => {
 
     const { data: group, error: groupError } = await supabase
         .from("groups")
-        .insert({ name, invite_code: inviteCode, created_by: user.sub })
+        .insert({ name, invite_code: inviteCode, created_by: user.sub, from_start: fromStart })
         .select()
         .single();
 

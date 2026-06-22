@@ -6,6 +6,7 @@ export type LeagueData = {
   invite_code: string
   created_at: string
   created_by: string
+  from_start: boolean
 }
 
 export type UserLeague = {

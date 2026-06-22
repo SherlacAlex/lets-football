@@ -30,6 +30,9 @@
             <h1 class="text-2xl sm:text-3xl font-extrabold text-white">
               {{ groupDetail.group.name }}
             </h1>
+            <p class="text-slate-500 text-sm mt-1.5">
+              {{ pointsCalculationLabel }}
+            </p>
             <p class="text-slate-400 text-sm mt-2">
               {{ groupDetail.ranking.length }}
               {{ groupDetail.ranking.length === 1 ? 'member' : 'members' }}
@@ -155,6 +158,25 @@ const {
 )
 
 const groupDetail = computed(() => groupResponse.value)
+
+const pointsCalculationLabel = computed(() => {
+  const group = groupDetail.value?.group
+  if (!group) {
+    return ''
+  }
+
+  if (group.from_start) {
+    return 'Points are calculated from the beginning of the tournament'
+  }
+
+  const formattedDate = new Intl.DateTimeFormat('en-IN', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  }).format(new Date(group.created_at))
+
+  return `Points are calculated from ${formattedDate}`
+})
 
 useAppSeo({
   title: computed(() => groupDetail.value?.group.name ?? 'League'),

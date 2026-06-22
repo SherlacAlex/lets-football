@@ -79,6 +79,43 @@
               class="w-full bg-slate-950/60 border border-slate-800 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-2xl py-3 px-4 text-white placeholder-slate-600 focus:outline-none transition-all duration-200"
             />
           </div>
+          <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3">
+              Points calculation period
+            </label>
+
+            <div class="space-y-3">
+              <label
+                class="flex items-center gap-3 rounded-xl border border-slate-800 bg-slate-950/60 p-3 cursor-pointer"
+              >
+                <input
+                  v-model="pointsStartFrom"
+                  type="radio"
+                  value="tournament"
+                  name="points-start-from"
+                  class="h-4 w-4"
+                />
+                <span class="text-sm text-slate-200">
+                  Beginning of the tournament
+                </span>
+              </label>
+
+              <label
+                class="flex items-center gap-3 rounded-xl border border-slate-800 bg-slate-950/60 p-3 cursor-pointer"
+              >
+                <input
+                  v-model="pointsStartFrom"
+                  type="radio"
+                  value="league_creation"
+                  name="points-start-from"
+                  class="h-4 w-4"
+                />
+                <span class="text-sm text-slate-200">
+                  From the date of league creation
+                </span>
+              </label>
+            </div>
+          </div>
 
           <button
             type="submit"
@@ -122,6 +159,7 @@ const formMessage = ref('')
 const formMessageType = ref<'success' | 'error'>('error')
 const createdInviteCode = ref('')
 const copiedInviteCode = ref(false)
+const pointsStartFrom = ref('tournament')
 
 let copyResetTimer: ReturnType<typeof setTimeout> | undefined
 
@@ -183,7 +221,7 @@ async function submit() {
   try {
     const response = await $fetch(apiRoutes.groups, {
       method: 'POST',
-      body: { name },
+      body: { name, fromStart: pointsStartFrom.value === 'tournament' },
     })
     const group = normalizeCreatedGroup(response)
     if (!group) {
