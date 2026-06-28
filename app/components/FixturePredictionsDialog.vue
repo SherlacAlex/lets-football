@@ -16,7 +16,15 @@
             <UIcon name="i-heroicons-x-mark" class="w-5 h-5" />
           </button>
         </div>
-
+        <div
+          v-if="fixture.group_name === 'KO'"
+          class="mx-4 mt-3 sm:mx-6 sm:mt-4 p-3 rounded-2xl border border-amber-500/20 bg-amber-500/10 text-amber-200/90 text-sm flex items-start gap-2 shrink-0">
+          <UIcon name="i-heroicons-exclamation-triangle" class="w-5 h-5 shrink-0 mt-0.5 text-amber-400" />
+          <p>
+            If a match goes to extra time, the score at the end of extra time is used as the final score.
+            Penalty shootouts are not counted.
+          </p>
+        </div>
         <div class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
           <div v-if="formMessage" :class="[
             formMessageType === 'success'
