@@ -319,6 +319,10 @@ async function submit() {
       })
     }
 
+    await $fetch(apiRoutes.adminFixtureCalculate(props.fixture.id), {
+        method: "POST",
+    });
+
     adminDashboardStore.setResultForFixture(
       props.fixture.id,
       homeScore,

@@ -52,12 +52,5 @@ export default defineEventHandler(async (event) => {
         });
     }
 
-    // Recalculate points for this fixture
-    const { error: calcError } = await supabase.rpc(
-        "calculate_fixture_points",
-        { fixture_id_param: fixtureId },
-    );
-    if (calcError) console.error("Point recalculation error:", calcError);
-
     return { success: true };
 });
