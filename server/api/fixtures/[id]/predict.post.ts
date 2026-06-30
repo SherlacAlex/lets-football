@@ -20,6 +20,34 @@ export default defineEventHandler(async (event) => {
         throw createError({ statusCode: 400, message: 'Prediction closed' })
     }
 
+    // Fetch current fixture questions
+    const { data: fixtureQuestions, error: fqError } = await supabase
+        .from("fixture_question")
+        .select("question_template_id")
+        .eq("fixture_id", fixtureId);
+
+    if (fqError) {
+        throw createError({
+            statusCode: 500,
+            message: fqError.message,
+        });
+    }
+
+    const validQuestionIds = new Set(
+        fixtureQuestions.map((q) => q.question_template_id)
+    );
+
+    // Ensure every submitted question still belongs to this fixture
+    for (const ans of body.answers) {
+        if (!validQuestionIds.has(ans.question_template_id)) {
+            throw createError({
+                statusCode: 409,
+                message: "Prediction questions have changed. Please refresh the page.",
+            });
+        }
+    }
+
+
     // Upsert score prediction
     const { error: scoreError } = await supabase
         .from('score_prediction')
